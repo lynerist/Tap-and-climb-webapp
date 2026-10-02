@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+const SUPABASE_URL = 'https://hvetnqzwjrrfzvjocqnu.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXRucXp3anJyZnp2am9jcW51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjY1MjMsImV4cCI6MjEwNjU0MjUyM30.gQb22BCZWI62FLHoI35eYrEuhd2p-Vva5SnJHN9v6II';
+</script>
+<title>Carnet Palestra</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1c2230; --muted:#6b7385; --accent:#2f6fed; --ok:#1f9d55; --bad:#d64545; --line:#e4e7ee; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#8b93a7; --line:#2a303d; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:var(--card); border-bottom:1px solid var(--line); }
+  header h1 { font-size:18px; margin:0; }
+  main { max-width:640px; margin:0 auto; padding:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  button { font:inherit; border:0; border-radius:10px; padding:12px 16px; background:var(--accent); color:#fff; cursor:pointer; }
+  button.big { width:100%; font-size:18px; padding:16px; }
+  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 12px; }
+  button.ok { background:var(--ok); } button.bad { background:var(--bad); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .center { text-align:center; padding-top:15vh; }
+  .muted { color:var(--muted); font-size:14px; }
+  .dots { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:14px 0; }
+  .dot { aspect-ratio:1; border-radius:50%; border:2px solid var(--line); display:grid; place-items:center; font-size:13px; color:var(--muted); }
+  .dot.used { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 0; border-top:1px solid var(--line); }
+  .row:first-of-type { border-top:0; }
+  .badge { font-size:12px; padding:3px 8px; border-radius:99px; background:var(--line); }
+  .badge.active { background:var(--ok); color:#fff; } .badge.requested { background:#e5a300; color:#fff; }
+  .badge.rejected { background:var(--bad); color:#fff; }
+  details summary { cursor:pointer; }
+  #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:12px 18px; border-radius:10px; display:none; max-width:90%; z-index:9; }
+  .actions { display:flex; gap:8px; }
+</style>
+</head>
+<body>
+<div id="app"><p style="padding:16px">Caricamento…</p></div>
+<div id="toast"></div>
+
+<script>
+window.onerror = (m, s, l) => { document.getElementById('app').innerHTML = '<pre style="padding:16px;white-space:pre-wrap;color:#f66">Errore: ' + m + ' (riga ' + l + ')</pre>'; };
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $app = document.getElementById('app');
+let profile = null;
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
+const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato', rejected:'Rifiutato' };
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', 3500);
+}
+
+async function rpc(fn, args) {
+  const { error } = await sb.rpc(fn, args);
+  if (error) { toast(error.message); return false; }
+  return true;
+}
+
+// ---------- Auth ----------
+async function login() {
+  await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + location.pathname } });
+}
+async function logout() { await sb.auth.signOut(); }
+
+function renderLogin() {
+  $app.innerHTML = `<div class="center"><h1>🧗 Carnet Palestra</h1>
+    <p class="muted">Accedi per gestire i tuoi ingressi</p>
+    <button id="g">Accedi con Google</button></div>`;
+  document.getElementById('g').onclick = login;
+}
+
+function shell(inner) {
+  $app.innerHTML = `<header><h1>🧗 Carnet Palestra</h1>
+    <div><span class="muted">${esc(profile.full_name || profile.email)}</span>
+    <button class="ghost" id="out">Esci</button></div></header><main>${inner}</main>`;
+  document.getElementById('out').onclick = logout;
+}
+
+// ---------- Utente ----------
+async function renderUser() {
+  const { data: carnets, error } = await sb.from('carnets')
+    .select('*, entries(entry_date)').eq('user_id', profile.id)
+    .order('requested_at', { ascending:false });
+  if (error) { toast(error.message); return; }
+
+  const open = carnets.find(c => ['requested','active'].includes(c.status));
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
+  let top = '';
+
+  if (!open) {
+    top = `<div class="card"><h2>Nessun carnet attivo</h2>
+      <button class="big" id="req">Richiedi un carnet da 12 ingressi</button></div>`;
+  } else if (open.status === 'requested') {
+    top = `<div class="card"><h2>Richiesta in attesa ⏳</h2>
+      <p class="muted">Richiesta il ${fmtDate(open.requested_at)}. Un amministratore la approverà a breve.</p></div>`;
+  } else {
+    const used = open.entries.length;
+    const doneToday = open.entries.some(e => e.entry_date === today);
+    const dots = Array.from({ length: open.total_entries }, (_, i) =>
+      `<div class="dot ${i < used ? 'used' : ''}">${i + 1}</div>`).join('');
+    top = `<div class="card"><h2>Carnet attivo: ${used}/${open.total_entries} ingressi</h2>
+      <div class="dots">${dots}</div>
+      <button class="big" id="enter" ${doneToday ? 'disabled' : ''}>
+        ${doneToday ? '✅ Ingresso di oggi già segnato' : 'Segna ingresso di oggi'}</button></div>`;
+  }
+
+  const history = carnets.length ? carnets.map(c => {
+    const dates = c.entries.map(e => e.entry_date).sort();
+    return `<details class="row" style="display:block">
+      <summary><b>Carnet del ${fmtDate(c.requested_at)}</b>
+        <span class="badge ${c.status}">${STATUS[c.status]}</span>
+        <span class="muted"> ${c.entries.length}/${c.total_entries}</span></summary>
+      <div class="muted" style="margin-top:8px">${dates.length
+        ? dates.map(d => `• ${fmtDate(d)}`).join('<br>') : 'Nessun ingresso'}</div></details>`;
+  }).join('') : '<p class="muted">Nessun carnet ancora.</p>';
+
+  shell(`${top}<div class="card"><h2>Storico carnet</h2>${history}</div>`);
+
+  document.getElementById('req')?.addEventListener('click', async () => { if (await rpc('request_carnet')) renderUser(); });
+  document.getElementById('enter')?.addEventListener('click', async () => { if (await rpc('register_entry')) { toast('Ingresso registrato ✅'); renderUser(); } });
+}
+
+// ---------- Avvio ----------
+async function init(session) {
+  if (!session) { profile = null; return renderLogin(); }
+  const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if (error) { toast(error.message); return renderLogin(); }
+  profile = data;
+  renderUser();
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+    setTimeout(() => init(session), 0);
+  }
+});
+</script>
+</body>
+</html>
