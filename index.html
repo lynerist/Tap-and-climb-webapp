@@ -91,11 +91,15 @@ function shell(inner) {
 
 // ---------- Utente ----------
 async function renderUser() {
-  const { data: carnets, error } = await sb.from('carnets')
+  let { data: carnets, error } = await sb.from('carnets')
     .select('*, entries(entry_date)').eq('user_id', profile.id)
     .order('requested_at', { ascending:false });
   if (error) { toast(error.message); return; }
 
+  const EXP = 5 * 60 * 1000;
+  const left = c => EXP - (Date.now() - new Date(c.requested_at).getTime());
+  clearTimeout(renderUser._t);
+  carnets = carnets.filter(c => !(c.status === 'requested' && left(c) <= 0)); // richieste scadute: ignorate
   const open = carnets.find(c => ['requested','active'].includes(c.status));
   const today = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
   let top = '';
@@ -104,8 +108,10 @@ async function renderUser() {
     top = `<div class="card"><h2>Nessun carnet attivo</h2>
       <button class="big" id="req">Richiedi un carnet da 12 ingressi</button></div>`;
   } else if (open.status === 'requested') {
+    const mins = Math.max(1, Math.ceil(left(open) / 60000));
     top = `<div class="card"><h2>Richiesta in attesa ⏳</h2>
-      <p class="muted">Richiesta il ${fmtDate(open.requested_at)}. Un amministratore la approverà a breve.</p></div>`;
+      <p class="muted">Un amministratore la approverà a breve. Se non viene confermata entro ${mins} min, la richiesta si annulla da sola.</p></div>`;
+    renderUser._t = setTimeout(renderUser, Math.max(1000, left(open) + 1000));
   } else {
     const used = open.entries.length;
     const doneToday = open.entries.some(e => e.entry_date === today);
