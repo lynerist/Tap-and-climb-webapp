@@ -25,6 +25,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   button.big { width:100%; font-size:18px; padding:16px; }
   button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 12px; }
   button.ok { background:var(--ok); } button.bad { background:var(--bad); }
+  input { width:100%; font:inherit; padding:12px; margin-bottom:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); }
   button:disabled { opacity:.5; cursor:not-allowed; }
   .center { text-align:center; padding-top:15vh; }
   .muted { color:var(--muted); font-size:14px; }
@@ -133,11 +134,35 @@ async function renderUser() {
 }
 
 // ---------- Avvio ----------
+function renderNameForm() {
+  const parts = (profile.full_name || '').trim().split(/\s+/).filter(Boolean);
+  const f = parts.shift() || '';
+  const l = parts.join(' ');
+  $app.innerHTML = `<div class="center"><h1>🧗 Benvenuto!</h1>
+    <p class="muted">Inserisci nome e cognome per completare la registrazione</p>
+    <div style="max-width:320px;margin:20px auto 0;text-align:left">
+      <input id="fn" placeholder="Nome" value="${esc(f)}" autocomplete="given-name">
+      <input id="ln" placeholder="Cognome" value="${esc(l)}" autocomplete="family-name">
+      <button class="big" id="save">Continua</button>
+    </div></div>`;
+  document.getElementById('save').onclick = async () => {
+    const fn = document.getElementById('fn').value.trim();
+    const ln = document.getElementById('ln').value.trim();
+    if (!fn || !ln) return toast('Inserisci nome e cognome');
+    if (await rpc('set_my_name', { p_first: fn, p_last: ln })) {
+      profile.name_confirmed = true;
+      profile.full_name = fn + ' ' + ln;
+      renderUser();
+    }
+  };
+}
+
 async function init(session) {
   if (!session) { profile = null; return renderLogin(); }
   const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (error) { toast(error.message); return renderLogin(); }
   profile = data;
+  if (!profile.name_confirmed) return renderNameForm();
   renderUser();
 }
 
