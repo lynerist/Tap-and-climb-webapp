@@ -144,7 +144,19 @@ async function renderUser() {
 
   shell(`${top}<div class="card"><h2>Storico carnet</h2>${history}</div>`);
 
-  document.getElementById('req')?.addEventListener('click', async () => { if (await rpc('request_carnet')) renderUser(); });
+  document.getElementById('req')?.addEventListener('click', async (ev) => {
+    const b = ev.currentTarget, label = b.textContent;
+    b.disabled = true; b.textContent = '📍 Controllo la posizione…';
+    try {
+      const pos = await getPosition();
+      if (await rpc('request_carnet', { p_lat: pos.latitude, p_lng: pos.longitude, p_accuracy: pos.accuracy })) return renderUser();
+    } catch (e) {
+      toast(e.code === 1 ? 'Per richiedere il carnet devi consentire l\'accesso alla posizione nelle impostazioni del browser'
+          : e.code === 3 ? 'Posizione non trovata in tempo: riprova all\'aperto o attiva il GPS'
+          : 'Impossibile leggere la posizione: attiva la localizzazione e riprova');
+    }
+    b.disabled = false; b.textContent = label;
+  });
   document.getElementById('enter')?.addEventListener('click', async (ev) => {
     const b = ev.currentTarget, label = b.textContent;
     b.disabled = true; b.textContent = '📍 Controllo la posizione…';
