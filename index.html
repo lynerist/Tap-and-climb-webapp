@@ -129,7 +129,7 @@ function shell(inner) {
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
     <button class="ghost" id="out">Esci</button></header>
     <main>${inner}
-    <div class="tip" id="instbox" style="display:none"><span>📲 Installa l'app</span>
+    <div class="tip" id="instbox" style="display:none"><span>📲 Se preferisci installa l'app</span>
     <button class="ghost" id="inst">Installa</button></div></main>`;
   document.getElementById('out').onclick = logout;
   wireInstall();
