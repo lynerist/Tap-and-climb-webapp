@@ -25,7 +25,13 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
   header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:var(--card); border-bottom:1px solid var(--line); }
-  header h1 { font-size:18px; margin:0; }
+  header h1 { font-size:18px; margin:0; white-space:nowrap; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand img { border-radius:8px; }
+  header button.ghost { padding:6px 12px; font-size:14px; }
+  .hello { margin:4px 2px 14px; font-size:20px; }
+  .install { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; }
+  .install button { width:auto; padding:8px 16px; white-space:nowrap; }
   main { max-width:640px; margin:0 auto; padding:16px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
   h2 { font-size:16px; margin:0 0 12px; }
@@ -92,7 +98,9 @@ window.addEventListener('appinstalled', () => { deferredInstall = null; wireInst
 function wireInstall() {
   const b = document.getElementById('inst');
   if (!b) return;
-  b.style.display = (deferredInstall && !isStandalone()) ? '' : 'none';
+  const show = deferredInstall && !isStandalone();
+  const box = document.getElementById('instbox');
+  if (box) box.style.display = show ? '' : 'none'; else b.style.display = show ? '' : 'none';
   b.onclick = async () => {
     if (!deferredInstall) return;
     deferredInstall.prompt();
@@ -119,10 +127,12 @@ function renderLogin() {
 }
 
 function shell(inner) {
-  $app.innerHTML = `<header><h1>🧗 Carnet Palestra</h1>
-    <div><span class="muted">${esc(profile.full_name || profile.email)}</span>
-    <button class="ghost" id="inst" style="display:none">📲 Installa</button>
-    <button class="ghost" id="out">Esci</button></div></header><main>${inner}</main>`;
+  const nome = esc(profile.first_name || profile.full_name || profile.email);
+  $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
+    <button class="ghost" id="out">Esci</button></header>
+    <main><p class="hello">Ciao, <b>${nome}</b> 👋</p>
+    <div class="card install" id="instbox" style="display:none"><span>📲 Installa l'app sul telefono</span>
+    <button id="inst">Installa</button></div>${inner}</main>`;
   document.getElementById('out').onclick = logout;
   wireInstall();
 }
