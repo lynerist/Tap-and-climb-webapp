@@ -53,14 +53,36 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   details summary { cursor:pointer; }
   #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:12px 18px; border-radius:10px; display:none; max-width:90%; z-index:9; }
   .actions { display:flex; gap:8px; }
+  /* Informativa privacy */
+  #pfoot { text-align:center; padding:8px 16px 28px; }
+  #pfoot a { color:var(--muted); font-size:13px; text-decoration:none; }
+  #pfoot a:hover { text-decoration:underline; }
+  #privacy { position:fixed; inset:0; z-index:20; background:var(--bg); overflow-y:auto; }
+  #privacy[hidden] { display:none; }
+  #privacy .wrap { max-width:640px; margin:0 auto; padding:16px 16px 48px; }
+  #privacy h1 { font-size:20px; margin:8px 0 4px; }
+  #privacy h3 { font-size:15px; margin:20px 0 6px; }
+  #privacy p, #privacy li { font-size:14px; line-height:1.55; }
+  #privacy ul { padding-left:20px; margin:6px 0; }
 </style>
 </head>
 <body>
 <div id="app"><p style="padding:16px">Caricamento…</p></div>
+<footer id="pfoot"><a href="#" id="plink">ⓘ Informativa privacy</a></footer>
+<div id="privacy" hidden></div>
 <div id="toast"></div>
 
 <script>
 window.onerror = (m, s, l) => { document.getElementById('app').innerHTML = '<pre style="padding:16px;white-space:pre-wrap;color:#f66">Errore: ' + m + ' (riga ' + l + ')</pre>'; };
+
+// ===== DATI PER L'INFORMATIVA PRIVACY (da completare) =====
+const PRIVACY = {
+  titolare: 'Tap and Climb',     // ragione sociale della palestra / associazione
+  email: '',                     // email per le richieste privacy (se vuota, il testo rimanda alla palestra)
+  anni: 3,                       // anni di conservazione dopo l'ultimo carnet
+  aggiornata: 'ottobre 2026'
+};
+// ==========================================================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $app = document.getElementById('app');
@@ -87,6 +109,53 @@ async function login() {
   await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.origin + location.pathname } });
 }
 async function logout() { await sb.auth.signOut(); }
+
+// ---------- Informativa privacy ----------
+function openPrivacy() {
+  const p = document.getElementById('privacy');
+  const t = esc(PRIVACY.titolare);
+  const contatto = PRIVACY.email ? `scrivi a <b>${esc(PRIVACY.email)}</b>` : 'rivolgiti alla palestra';
+  p.innerHTML = `<div class="wrap">
+    <button class="ghost" id="pclose">← Indietro</button>
+    <h1>Informativa sulla privacy</h1>
+    <p class="muted">Ai sensi degli artt. 13 e 14 del Regolamento UE 2016/679 (GDPR). Aggiornata a ${esc(PRIVACY.aggiornata)}.</p>
+
+    <h3>Chi è il titolare del trattamento</h3>
+    <p><b>${t}</b>. Per qualsiasi domanda sui tuoi dati ${contatto}.</p>
+
+    <h3>Quali dati trattiamo</h3>
+    <ul>
+      <li>Nome, cognome ed email del tuo account Google (il login avviene tramite Google: non conosciamo né salviamo la tua password).</li>
+      <li>I tuoi carnet (richiesta, approvazione, stato) e le date dei tuoi ingressi, comprese quelle eventualmente registrate da un amministratore.</li>
+      <li>Se il tesseramento è stato inserito dalla palestra, i dati indicati in quella fase (nome, cognome, email).</li>
+      <li>Lo stato del rinnovo annuale della tessera.</li>
+    </ul>
+    <p><b>Posizione.</b> Quando richiedi un carnet o segni un ingresso, il telefono invia la posizione solo per verificare che tu sia in palestra. La posizione <b>non viene salvata</b>: serve per un controllo istantaneo e poi viene scartata.</p>
+
+    <h3>Perché li trattiamo</h3>
+    <p>Per gestire il tuo tesseramento e i tuoi carnet da 12 ingressi: verificare gli ingressi, evitare doppie registrazioni e gestire i rinnovi. La base giuridica è l'esecuzione del rapporto con la palestra (art. 6.1.b GDPR). Non serve un consenso e non facciamo marketing né profilazione.</p>
+
+    <h3>Per quanto tempo li conserviamo</h3>
+    <p>Finché sei socio e per ${esc(PRIVACY.anni)} anni dopo l'ultimo carnet, poi vengono cancellati. Le richieste di carnet non approvate si cancellano da sole dopo 5 minuti.</p>
+
+    <h3>Chi può vederli</h3>
+    <p>Solo tu e gli amministratori della palestra. Per far funzionare il servizio ci affidiamo a fornitori che trattano i dati per nostro conto: <b>Supabase</b> (database e accesso), <b>Google</b> (login) e <b>GitHub</b> (pubblicazione di questa pagina). Alcuni di questi fornitori possono trattare dati anche fuori dall'Unione Europea, con le garanzie previste dal GDPR (ad esempio le clausole contrattuali standard). Una copia di sicurezza dei dati viene inviata ogni settimana a un indirizzo email del titolare. Non vendiamo né cediamo i dati a terzi.</p>
+
+    <h3>Cookie</h3>
+    <p>Usiamo solo l'archiviazione tecnica del browser necessaria a mantenerti collegato. Non usiamo cookie di profilazione, statistiche o pubblicità, quindi non serve alcun banner.</p>
+
+    <h3>I tuoi diritti</h3>
+    <p>Puoi chiedere in qualsiasi momento di accedere ai tuoi dati, correggerli, cancellarli, limitarne il trattamento, riceverli in formato leggibile o opporti al trattamento: ${contatto}. Se ritieni che i tuoi dati non siano trattati correttamente puoi presentare reclamo al Garante per la protezione dei dati personali (<b>www.garanteprivacy.it</b>).</p>
+  </div>`;
+  p.hidden = false; p.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  document.getElementById('pclose').onclick = closePrivacy;
+}
+function closePrivacy() {
+  document.getElementById('privacy').hidden = true;
+  document.body.style.overflow = '';
+}
+document.getElementById('plink').onclick = e => { e.preventDefault(); openPrivacy(); };
 
 // ---------- Installazione come app (PWA) ----------
 let deferredInstall = null;
@@ -120,8 +189,10 @@ function renderLogin() {
     <p class="muted">Accedi per gestire i tuoi ingressi</p>
     <button id="g">Accedi con Google</button>
     <p><button class="ghost" id="inst" style="display:none">📲 Installa l'app</button></p>
+    <p class="muted" style="margin-top:16px;font-size:12px">Accedendo, dichiari di aver letto l'<a href="#" id="plogin" style="color:inherit">informativa privacy</a>.</p>
     ${iosHint()}</div>`;
   document.getElementById('g').onclick = login;
+  document.getElementById('plogin').onclick = e => { e.preventDefault(); openPrivacy(); };
   wireInstall();
 }
 
