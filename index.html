@@ -3,11 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#164e70">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tap and Climb">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script>
 const SUPABASE_URL = 'https://hvetnqzwjrrfzvjocqnu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXRucXp3anJyZnp2am9jcW51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NjY1MjMsImV4cCI6MjEwNjU0MjUyM30.gQb22BCZWI62FLHoI35eYrEuhd2p-Vva5SnJHN9v6II';
 </script>
-<title>Carnet Palestra</title>
+<title>Tap and Climb</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root { --bg:#f5f6f8; --card:#fff; --text:#1c2230; --muted:#6b7385; --accent:#2f6fed; --ok:#1f9d55; --bad:#d64545; --line:#e4e7ee; }
@@ -75,18 +83,48 @@ async function login() {
 }
 async function logout() { await sb.auth.signOut(); }
 
+// ---------- Installazione come app (PWA) ----------
+let deferredInstall = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; wireInstall(); });
+window.addEventListener('appinstalled', () => { deferredInstall = null; wireInstall(); });
+function wireInstall() {
+  const b = document.getElementById('inst');
+  if (!b) return;
+  b.style.display = (deferredInstall && !isStandalone()) ? '' : 'none';
+  b.onclick = async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    await deferredInstall.userChoice.catch(() => {});
+    deferredInstall = null; wireInstall();
+  };
+}
+function iosHint() {
+  return (isIOS() && !isStandalone())
+    ? '<p class="muted">Per installare l\'app su iPhone: tocca <b>Condividi</b> e poi <b>Aggiungi a Home</b>.</p>' : '';
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+
 function renderLogin() {
   $app.innerHTML = `<div class="center"><h1>🧗 Carnet Palestra</h1>
     <p class="muted">Accedi per gestire i tuoi ingressi</p>
-    <button id="g">Accedi con Google</button></div>`;
+    <button id="g">Accedi con Google</button>
+    <p><button class="ghost" id="inst" style="display:none">📲 Installa l'app</button></p>
+    ${iosHint()}</div>`;
   document.getElementById('g').onclick = login;
+  wireInstall();
 }
 
 function shell(inner) {
   $app.innerHTML = `<header><h1>🧗 Carnet Palestra</h1>
     <div><span class="muted">${esc(profile.full_name || profile.email)}</span>
+    <button class="ghost" id="inst" style="display:none">📲 Installa</button>
     <button class="ghost" id="out">Esci</button></div></header><main>${inner}</main>`;
   document.getElementById('out').onclick = logout;
+  wireInstall();
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
