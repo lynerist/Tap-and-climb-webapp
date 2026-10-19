@@ -31,7 +31,29 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg transform='translate(24 24)'%3E%3Cg fill='%23f6a9c6'%3E%3Ccircle cx='0' cy='-9' r='6.5'/%3E%3Ccircle cx='8.6' cy='-2.8' r='6.5'/%3E%3Ccircle cx='5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-8.6' cy='-2.8' r='6.5'/%3E%3C/g%3E%3Ccircle r='4' fill='%23ffd86b'/%3E%3C/g%3E%3Cg transform='translate(72 72) scale(.75)'%3E%3Cg fill='%23fbc4d8'%3E%3Ccircle cx='0' cy='-9' r='6.5'/%3E%3Ccircle cx='8.6' cy='-2.8' r='6.5'/%3E%3Ccircle cx='5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-8.6' cy='-2.8' r='6.5'/%3E%3C/g%3E%3Ccircle r='4' fill='%23ffe9a0'/%3E%3C/g%3E%3C/svg%3E");
     background-attachment: fixed;
   }
-  select { width:100%; font:inherit; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); }
+  :root[data-theme="pesce"] {
+    --bg:#dff1fb; --card:#fffaf3; --text:#12344d; --muted:#4f7894; --accent:#f26a21; --line:#bfe0f3;
+    color-scheme: light;
+  }
+  :root[data-theme="pesce"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 20 q15 -10 30 0 t30 0 t30 0 t30 0' fill='none' stroke='%23b9dcf2' stroke-width='3'/%3E%3Cpath d='M0 80 q15 -10 30 0 t30 0 t30 0 t30 0' fill='none' stroke='%23b9dcf2' stroke-width='3'/%3E%3Cg transform='translate(70 50)'%3E%3Cellipse rx='12' ry='7' fill='%23ff9a3c'/%3E%3Cpath d='M-10 0 L-22 -7 L-22 7 Z' fill='%23ff7a1a'/%3E%3Ccircle cx='6' cy='-1.5' r='1.5' fill='%231d3557'/%3E%3C/g%3E%3Cg transform='translate(25 105) scale(.7)'%3E%3Cellipse rx='12' ry='7' fill='%23ffb870'/%3E%3Cpath d='M-10 0 L-22 -7 L-22 7 Z' fill='%23ff9a3c'/%3E%3Ccircle cx='6' cy='-1.5' r='1.5' fill='%231d3557'/%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+  :root[data-theme="cai"] {
+    --bg:#f4f1ec; --card:#ffffff; --text:#22262b; --muted:#6b6f75; --accent:#b3202a; --line:#e0dbd2;
+    color-scheme: light;
+  }
+  :root[data-theme="cai"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='90'%3E%3Cpath d='M0 90 L35 35 L55 60 L80 20 L115 90 Z' fill='%23e6e2da'/%3E%3Cpath d='M70 90 L100 50 L140 90 Z' fill='%23ece8e1'/%3E%3Cpath d='M80 20 L88 33 L80 29 L72 33 Z' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+  header { position:relative; }
+  .hactions { display:flex; align-items:center; gap:8px; }
+  #thbtn { padding:4px 10px; font-size:18px; line-height:1.3; }
+  #thmenu { position:absolute; top:100%; right:12px; margin-top:6px; z-index:15; min-width:210px; padding:6px; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.18); }
+  #thmenu[hidden] { display:none; }
+  #thmenu button { display:block; width:100%; text-align:left; background:transparent; color:var(--text); padding:10px 12px; border-radius:8px; }
+  #thmenu button.sel { background:var(--line); font-weight:600; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
   header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:var(--card); border-bottom:1px solid var(--line); }
@@ -105,8 +127,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#f26a21', cai:'#b3202a' };
 function currentTheme() {
   if (!profile) return 'auto';
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
@@ -124,18 +146,32 @@ function applyTheme() {
   const m = document.querySelector('meta[name="theme-color"]');
   if (m) m.content = THEME_COLOR[t];
 }
-function themeCard() {
-  if (!profile || !profile.can_switch_theme) return '';
-  const cur = currentTheme();
-  return `<div class="card"><h2>🎨 Tema</h2><select id="thm">${
-    Object.entries(THEMES).map(([k, v]) => `<option value="${k}" ${k === cur ? 'selected' : ''}>${v}</option>`).join('')
-  }</select></div>`;
+// Pulsante con la sola tavolozza (a sinistra di "Esci"), visibile solo a chi può cambiare tema
+function themeBtn() {
+  return (profile && profile.can_switch_theme)
+    ? '<button class="ghost" id="thbtn" title="Tema" aria-label="Cambia tema">🎨</button>' : '';
 }
+function themeMenu() {
+  return (profile && profile.can_switch_theme) ? '<div id="thmenu" hidden></div>' : '';
+}
+document.addEventListener('click', () => {
+  const m = document.getElementById('thmenu');
+  if (m) m.hidden = true;
+});
 function wireTheme() {
-  const s = document.getElementById('thm');
-  if (!s) return;
-  s.onchange = () => {
-    try { localStorage.setItem('theme', s.value); } catch (e) {}
+  const b = document.getElementById('thbtn'), m = document.getElementById('thmenu');
+  if (!b || !m) return;
+  b.onclick = e => {
+    e.stopPropagation();
+    const cur = currentTheme();
+    m.innerHTML = Object.entries(THEMES).map(([k, v]) =>
+      `<button data-t="${k}" class="${k === cur ? 'sel' : ''}">${v}</button>`).join('');
+    m.hidden = !m.hidden;
+  };
+  m.onclick = e => {
+    const t = e.target.closest('button[data-t]');
+    if (!t) return;
+    try { localStorage.setItem('theme', t.dataset.t); } catch (err) {}
     profile.theme = null;           // il menu vale per chi può scegliere
     applyTheme();
   };
@@ -247,8 +283,8 @@ function renderLogin() {
 
 function shell(inner) {
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
-    <button class="ghost" id="out">Esci</button></header>
-    <main>${inner}${themeCard()}
+    <div class="hactions">${themeBtn()}<button class="ghost" id="out">Esci</button></div>${themeMenu()}</header>
+    <main>${inner}
     <div class="tip" id="instbox" style="display:none"><span>📲 Se preferisci installa l'app</span>
     <button class="ghost" id="inst">Installa</button></div></main>`;
   document.getElementById('out').onclick = logout;
