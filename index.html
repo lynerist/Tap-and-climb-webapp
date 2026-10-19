@@ -47,6 +47,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='90'%3E%3Cpath d='M0 90 L35 35 L55 60 L80 20 L115 90 Z' fill='%23e6e2da'/%3E%3Cpath d='M70 90 L100 50 L140 90 Z' fill='%23ece8e1'/%3E%3Cpath d='M80 20 L88 33 L80 29 L72 33 Z' fill='%23ffffff'/%3E%3C/svg%3E");
     background-attachment: fixed;
   }
+  :root[data-theme="magikarp"] {
+    --bg:#e6d8b8; --card:rgba(255,250,238,.93); --text:#1d2b36; --muted:#55666f; --accent:#1f7a8c; --line:#d9c9a3;
+    color-scheme: light;
+  }
+  :root[data-theme="magikarp"] body {
+    background-image: linear-gradient(rgba(240,228,200,.30), rgba(240,228,200,.30)), url("img/tema-magikarp.jpg");
+    background-size: cover; background-position: center top; background-attachment: fixed;
+  }
+  :root[data-theme="palestra"] {
+    --bg:#eceae6; --card:#ffffff; --text:#23272e; --muted:#6d727b; --accent:#e4572e; --line:#d9d6d0;
+    color-scheme: light;
+  }
+  :root[data-theme="palestra"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='%23d3d0c9'%3E%3Ccircle cx='15' cy='15' r='2'/%3E%3Ccircle cx='95' cy='15' r='2'/%3E%3Ccircle cx='15' cy='95' r='2'/%3E%3Ccircle cx='95' cy='95' r='2'/%3E%3Ccircle cx='55' cy='135' r='2'/%3E%3Ccircle cx='135' cy='55' r='2'/%3E%3C/g%3E%3Cg fill-opacity='.65'%3E%3Cpath d='M30 40 q10 -14 26 -6 q12 8 4 20 q-14 10 -28 2 z' fill='%23e4572e'/%3E%3Cellipse cx='115' cy='28' rx='14' ry='9' transform='rotate(-25 115 28)' fill='%23f2b705'/%3E%3Cpath d='M105 105 q12 -12 28 -2 q8 12 -4 22 q-16 4 -26 -6 z' fill='%232a9d8f'/%3E%3Cellipse cx='40' cy='118' rx='10' ry='14' transform='rotate(20 40 118)' fill='%23457b9d'/%3E%3Cpath d='M72 72 l14 -6 l8 12 l-14 8 z' fill='%238e5ea2'/%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
   header { position:relative; }
   .hactions { display:flex; align-items:center; gap:8px; }
   #thbtn { padding:4px 10px; font-size:18px; line-height:1.3; }
@@ -127,8 +143,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#f26a21', cai:'#b3202a' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#f26a21', cai:'#b3202a', magikarp:'#1f7a8c', palestra:'#e4572e' };
 function currentTheme() {
   if (!profile) return 'auto';
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
