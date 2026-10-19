@@ -20,8 +20,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 <style>
   :root { --bg:#f5f6f8; --card:#fff; --text:#1c2230; --muted:#6b7385; --accent:#2f6fed; --ok:#1f9d55; --bad:#d64545; --line:#e4e7ee; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#8b93a7; --line:#2a303d; }
+    :root:not([data-theme]) { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#8b93a7; --line:#2a303d; }
   }
+  :root[data-theme="scuro"] { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#8b93a7; --line:#2a303d; }
+  :root[data-theme="rosa"] {
+    --bg:#fde6ef; --card:#fff8fb; --text:#4a2133; --muted:#a06b82; --accent:#e0508a; --line:#f3c6d8;
+    color-scheme: light;
+  }
+  :root[data-theme="rosa"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cg transform='translate(24 24)'%3E%3Cg fill='%23f6a9c6'%3E%3Ccircle cx='0' cy='-9' r='6.5'/%3E%3Ccircle cx='8.6' cy='-2.8' r='6.5'/%3E%3Ccircle cx='5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-8.6' cy='-2.8' r='6.5'/%3E%3C/g%3E%3Ccircle r='4' fill='%23ffd86b'/%3E%3C/g%3E%3Cg transform='translate(72 72) scale(.75)'%3E%3Cg fill='%23fbc4d8'%3E%3Ccircle cx='0' cy='-9' r='6.5'/%3E%3Ccircle cx='8.6' cy='-2.8' r='6.5'/%3E%3Ccircle cx='5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-5.3' cy='7.3' r='6.5'/%3E%3Ccircle cx='-8.6' cy='-2.8' r='6.5'/%3E%3C/g%3E%3Ccircle r='4' fill='%23ffe9a0'/%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+  select { width:100%; font:inherit; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
   header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; background:var(--card); border-bottom:1px solid var(--line); }
@@ -91,6 +101,45 @@ let profile = null;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
 const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato', rejected:'Rifiutato' };
+
+// ---------- Temi ----------
+// 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
+// chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a' };
+function currentTheme() {
+  if (!profile) return 'auto';
+  if (profile.theme && THEMES[profile.theme]) return profile.theme;
+  if (profile.can_switch_theme) {
+    let t = null;
+    try { t = localStorage.getItem('theme'); } catch (e) {}
+    if (t && THEMES[t]) return t;
+  }
+  return 'auto';
+}
+function applyTheme() {
+  const t = currentTheme();
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = THEME_COLOR[t];
+}
+function themeCard() {
+  if (!profile || !profile.can_switch_theme) return '';
+  const cur = currentTheme();
+  return `<div class="card"><h2>🎨 Tema</h2><select id="thm">${
+    Object.entries(THEMES).map(([k, v]) => `<option value="${k}" ${k === cur ? 'selected' : ''}>${v}</option>`).join('')
+  }</select></div>`;
+}
+function wireTheme() {
+  const s = document.getElementById('thm');
+  if (!s) return;
+  s.onchange = () => {
+    try { localStorage.setItem('theme', s.value); } catch (e) {}
+    profile.theme = null;           // il menu vale per chi può scegliere
+    applyTheme();
+  };
+}
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -199,11 +248,12 @@ function renderLogin() {
 function shell(inner) {
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
     <button class="ghost" id="out">Esci</button></header>
-    <main>${inner}
+    <main>${inner}${themeCard()}
     <div class="tip" id="instbox" style="display:none"><span>📲 Se preferisci installa l'app</span>
     <button class="ghost" id="inst">Installa</button></div></main>`;
   document.getElementById('out').onclick = logout;
   wireInstall();
+  wireTheme();
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
@@ -316,10 +366,11 @@ function renderNameForm() {
 }
 
 async function init(session) {
-  if (!session) { profile = null; return renderLogin(); }
+  if (!session) { profile = null; applyTheme(); return renderLogin(); }
   const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (error) { toast(error.message); return renderLogin(); }
   profile = data;
+  applyTheme();
   if (!profile.name_confirmed) return renderNameForm();
   renderUser();
 }
