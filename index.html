@@ -174,8 +174,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', cai:'#0a2342', magikarp:'#14202b', palestra:'#1f2328', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', cai:'#0a2342', magikarp:'#14202b', palestra:'#1f2328', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70' };
 function currentTheme() {
   if (!profile) return 'auto';
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
@@ -186,8 +186,19 @@ function currentTheme() {
   }
   return 'auto';
 }
+// 'casuale': ogni giorno un tema diverso (uguale per tutta la giornata, ora italiana), scelto tra quelli decorativi
+const RANDOM_POOL = ['rosa','pesce','cai','magikarp','palestra','albero','turchese','gattini'];
+function themeOfTheDay() {
+  const day = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
+  const key = day + (profile ? profile.id : '');
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 2654435761) >>> 0;
+  h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13; h = Math.imul(h, 3266489917) >>> 0; h ^= h >>> 16;
+  return RANDOM_POOL[(h >>> 0) % RANDOM_POOL.length];
+}
 function applyTheme() {
-  const t = currentTheme();
+  let t = currentTheme();
+  if (t === 'casuale') t = themeOfTheDay();
   if (t === 'auto') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', t);
   const m = document.querySelector('meta[name="theme-color"]');
