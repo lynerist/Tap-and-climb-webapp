@@ -86,6 +86,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     background-attachment: fixed;
   }
   :root[data-theme="turchese"] button:not(.ghost):not(.bad):not(.ok) { background:#39c5bb; color:#0c2326; }
+  :root[data-theme="gattini"] {
+    --bg:#fff1e6; --card:rgba(255,252,248,.94); --text:#4a2c2a; --muted:#a07a6e; --accent:#f08a5d; --line:#f3d3c0;
+    color-scheme: light;
+  }
+  :root[data-theme="gattini"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cg transform='translate(34 36) scale(1)'%3E%3Cpath d='M-14 -4 L-14 -20 L-5 -12 L5 -12 L14 -20 L14 -4 Q14 10 0 10 Q-14 10 -14 -4Z' fill='%23f6b26b'/%3E%3Ccircle cx='-6' cy='-3' r='1.8' fill='%23513'/%3E%3Ccircle cx='6' cy='-3' r='1.8' fill='%23513'/%3E%3Cpath d='M-1.5 1 L1.5 1 L0 3Z' fill='%23f2859b'/%3E%3Cpath d='M-16 1 L-8 2 M-16 5 L-8 4 M16 1 L8 2 M16 5 L8 4' stroke='%23513' stroke-width='.8' fill='none'/%3E%3C/g%3E%3Cg transform='translate(112 84) scale(0.85)'%3E%3Cpath d='M-14 -4 L-14 -20 L-5 -12 L5 -12 L14 -20 L14 -4 Q14 10 0 10 Q-14 10 -14 -4Z' fill='%23d9d2e9'/%3E%3Ccircle cx='-6' cy='-3' r='1.8' fill='%23513'/%3E%3Ccircle cx='6' cy='-3' r='1.8' fill='%23513'/%3E%3Cpath d='M-1.5 1 L1.5 1 L0 3Z' fill='%23f2859b'/%3E%3Cpath d='M-16 1 L-8 2 M-16 5 L-8 4 M16 1 L8 2 M16 5 L8 4' stroke='%23513' stroke-width='.8' fill='none'/%3E%3C/g%3E%3Cg transform='translate(40 118) scale(0.7)'%3E%3Cpath d='M-14 -4 L-14 -20 L-5 -12 L5 -12 L14 -20 L14 -4 Q14 10 0 10 Q-14 10 -14 -4Z' fill='%23cfcfcf'/%3E%3Ccircle cx='-6' cy='-3' r='1.8' fill='%23513'/%3E%3Ccircle cx='6' cy='-3' r='1.8' fill='%23513'/%3E%3Cpath d='M-1.5 1 L1.5 1 L0 3Z' fill='%23f2859b'/%3E%3Cpath d='M-16 1 L-8 2 M-16 5 L-8 4 M16 1 L8 2 M16 5 L8 4' stroke='%23513' stroke-width='.8' fill='none'/%3E%3C/g%3E%3Cg fill='%23f4a6b8'%3E%3Ccircle cx='96' cy='24' r='3'/%3E%3Ccircle cx='103' cy='19' r='2'/%3E%3Ccircle cx='110' cy='24' r='2'/%3E%3Ccircle cx='103' cy='29' r='3.5'/%3E%3Ccircle cx='80' cy='128' r='3'/%3E%3Ccircle cx='87' cy='123' r='2'/%3E%3Ccircle cx='94' cy='128' r='2'/%3E%3Ccircle cx='87' cy='133' r='3.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
   header { position:relative; }
   .hactions { display:flex; align-items:center; gap:8px; }
   #thbtn { padding:4px 10px; font-size:18px; line-height:1.3; }
@@ -166,8 +174,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', cai:'#0a2342', magikarp:'#14202b', palestra:'#1f2328', albero:'#cfe8f7', turchese:'#10282c' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', cai:'#0a2342', magikarp:'#14202b', palestra:'#1f2328', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d' };
 function currentTheme() {
   if (!profile) return 'auto';
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
