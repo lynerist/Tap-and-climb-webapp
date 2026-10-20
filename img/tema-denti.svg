@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 330">
+<rect x="0" y="295" width="380" height="35" fill="#6fb35a"/>
+<ellipse cx="250" cy="300" rx="38" ry="9" fill="#8a8f98"/>
+<rect x="20" y="0" width="62" height="302" fill="#7a4e2d"/>
+<rect x="34" y="30" width="5" height="90" fill="#5f3a1e"/>
+<rect x="58" y="160" width="5" height="110" fill="#5f3a1e"/>
+<circle cx="30" cy="40" r="34" fill="#3f8f4a"/>
+<circle cx="75" cy="30" r="28" fill="#4aa055"/>
+<rect x="80" y="135" width="53" height="25" fill="#8d5a34"/>
+<polygon points="133,155 143,155 143,160 133,160" fill="#c9a06b"/>
+<polygon points="134,152 138,158 141,151 143,159 133,160" fill="#e3c392"/>
+<g transform="rotate(8 143 150)">
+<rect x="143" y="135" width="187" height="25" fill="#8d5a34"/>
+<circle cx="318" cy="128" r="26" fill="#3f8f4a"/>
+<circle cx="340" cy="150" r="20" fill="#4aa055"/>
+<rect x="224" y="173" width="8" height="26" fill="#2b3a67"/>
+<rect x="238" y="173" width="8" height="26" fill="#2b3a67"/>
+<rect x="221" y="196" width="14" height="8" rx="3" fill="#2a2a2a"/>
+<rect x="235" y="196" width="14" height="8" rx="3" fill="#2a2a2a"/>
+<rect x="222" y="132" width="24" height="12" fill="#2b3a67"/>
+<rect x="222" y="132" width="8" height="45" fill="#2b3a67"/>
+<rect x="238" y="132" width="8" height="45" fill="#2b3a67"/>
+<rect x="219" y="96" width="30" height="42" rx="6" fill="#e07a1f"/>
+<rect x="219" y="118" width="30" height="5" fill="#2a2a2a"/>
+<circle cx="234" cy="84" r="11" fill="#f2c9a0"/>
+<path d="M222 82 A12 12 0 0 1 246 82 Z" fill="#f2c94c"/>
+<rect x="219" y="80" width="30" height="4" fill="#f2c94c"/>
+<circle cx="238" cy="86" r="1.6" fill="#222"/>
+<ellipse cx="240" cy="92" rx="3" ry="2.4" fill="#222"/>
+<line x1="222" y1="108" x2="170" y2="126" stroke="#e07a1f" stroke-width="8" stroke-linecap="round"/>
+<circle cx="165" cy="128" r="5" fill="#f2c9a0"/>
+<rect x="105" y="124" width="62" height="8" rx="2" fill="#aeb4bd"/>
+<polygon points="105,132 167,132 164,137 160,132 156,137 152,132 148,137 144,132 140,137 136,132 132,137 128,132 124,137 120,132 116,137 112,132 108,137" fill="#aeb4bd"/>
+<rect x="160" y="119" width="14" height="8" rx="3" fill="#2a2a2a"/>
+</g>
+<ellipse cx="300" cy="62" rx="40" ry="20" fill="#ffffff"/>
+<polygon points="269,74 261,94 281,79" fill="#ffffff"/>
+<text x="300" y="68" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="500" fill="#c62828">Ahia!</text>
+</svg>
