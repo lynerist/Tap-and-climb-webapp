@@ -220,6 +220,7 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', magikarp:'Magikarp 🌊', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻', porcini:'Porcini 🍄', natale:'Natale 🎄', halloween:'Halloween 🎃', aprile:'Pesce d\'aprile 🐠', cervino:'Cervino ⛰️' };
 const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', magikarp:'#14202b', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317', porcini:'#1e1a12', natale:'#1b2a52', halloween:'#1a1038', aprile:'#7fd3f0', cervino:'#1d2b5a' };
 // Temi di stagione: valgono per tutti e hanno la precedenza su quello personale (ora italiana)
+let sessionTheme = null;   // scelta temporanea nei periodi festivi: non viene salvata, alla riapertura torna il tema di stagione
 function seasonalTheme() {
   const md = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' }).slice(5);   // 'MM-DD'
   if (md >= '10-25' && md <= '10-31') return 'halloween';
@@ -230,7 +231,7 @@ function seasonalTheme() {
 function currentTheme() {
   if (!profile) return 'auto';
   const season = seasonalTheme();
-  if (season) return season;
+  if (season) return (profile.can_switch_theme && sessionTheme) ? sessionTheme : season;   // chi può cambiare tema lo fa solo per questa apertura
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
   if (profile.can_switch_theme) {
     let t = null;
@@ -282,8 +283,11 @@ function wireTheme() {
   m.onclick = e => {
     const t = e.target.closest('button[data-t]');
     if (!t) return;
-    try { localStorage.setItem('theme', t.dataset.t); } catch (err) {}
-    profile.theme = null;           // il menu vale per chi può scegliere
+    if (seasonalTheme()) sessionTheme = t.dataset.t;      // periodo festivo: scelta valida finché l'app resta aperta
+    else {
+      try { localStorage.setItem('theme', t.dataset.t); } catch (err) {}
+      profile.theme = null;           // il menu vale per chi può scegliere
+    }
     applyTheme();
   };
 }
