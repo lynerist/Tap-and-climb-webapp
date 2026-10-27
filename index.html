@@ -175,6 +175,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   details summary { cursor:pointer; }
   #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:12px 18px; border-radius:10px; display:none; max-width:90%; z-index:9; }
   .actions { display:flex; gap:8px; }
+  /* Menù a tab (solo admin) */
+  nav { position:fixed; bottom:0; left:0; right:0; z-index:5; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; background:transparent; color:var(--muted); border-radius:0; padding:14px 8px; font-size:15px; }
+  nav button.on { color:var(--accent); font-weight:600; }
   /* Informativa privacy */
   #pfoot { text-align:center; padding:8px 16px 28px; }
   #pfoot a { color:var(--muted); font-size:13px; text-decoration:none; }
@@ -209,6 +213,7 @@ const PRIVACY = {
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $app = document.getElementById('app');
 let profile = null;
+let tab = 'ingressi';   // 'ingressi' | 'pareti' (il menù è visibile solo agli admin)
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
@@ -294,6 +299,7 @@ function wireTheme() {
 
 function toast(msg) {
   const t = document.getElementById('toast');
+  t.style.bottom = (profile && profile.is_admin) ? '76px' : '20px';
   t.textContent = msg; t.style.display = 'block';
   clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', 3500);
 }
@@ -397,14 +403,38 @@ function renderLogin() {
 }
 
 function shell(inner) {
+  const admin = !!profile.is_admin;   // il menù a tab esiste solo per gli admin
+  const nav = admin ? `<nav>
+      <button data-tab="ingressi" class="${tab === 'ingressi' ? 'on' : ''}">🧗 Ingressi</button>
+      <button data-tab="pareti" class="${tab === 'pareti' ? 'on' : ''}">🧱 Pareti</button>
+    </nav>` : '';
+  document.body.style.paddingBottom = admin ? '64px' : '';
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
     <div class="hactions">${themeBtn()}<button class="ghost" id="out">Esci</button></div>${themeMenu()}</header>
     <main>${inner}
     <div class="tip" id="instbox" style="display:none"><span>📲 Se preferisci installa l'app</span>
-    <button class="ghost" id="inst">Installa</button></div></main>`;
+    <button class="ghost" id="inst">Installa</button></div></main>${nav}`;
   document.getElementById('out').onclick = logout;
+  document.querySelectorAll('nav [data-tab]').forEach(b => b.onclick = () => {
+    tab = b.dataset.tab;
+    clearTimeout(renderUser._t);
+    route();
+  });
   wireInstall();
   wireTheme();
+}
+
+// Mostra la schermata giusta in base alla tab (i non-admin vedono sempre "Ingressi")
+function route() {
+  if (profile && profile.is_admin && tab === 'pareti') return renderPareti();
+  tab = 'ingressi';
+  return renderUser();
+}
+
+// ---------- Tab "Pareti" (solo admin) ----------
+function renderPareti() {
+  shell(`<div class="card"><h2>Pareti</h2>
+    <p class="muted">Sezione in preparazione.</p></div>`);
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
@@ -422,6 +452,7 @@ async function renderUser() {
     .select('*, entries(entry_date)').eq('user_id', profile.id)
     .order('requested_at', { ascending:false });
   if (error) { toast(error.message); return; }
+  if (profile.is_admin && tab !== 'ingressi') return;   // nel frattempo si è cambiata tab
 
   const EXP = 5 * 60 * 1000;
   const left = c => EXP - (Date.now() - new Date(c.requested_at).getTime());
@@ -438,7 +469,7 @@ async function renderUser() {
     const mins = Math.max(1, Math.ceil(left(open) / 60000));
     top = `<div class="card"><h2>Richiesta in attesa ⏳</h2>
       <p class="muted">Un amministratore la approverà a breve. Se non viene confermata entro ${mins} min, la richiesta si annulla da sola.</p></div>`;
-    renderUser._t = setTimeout(renderUser, Math.max(1000, left(open) + 1000));
+    renderUser._t = setTimeout(() => { if (tab === 'ingressi') renderUser(); }, Math.max(1000, left(open) + 1000));
   } else {
     const used = open.entries.length;
     const doneToday = open.entries.some(e => e.entry_date === today);
@@ -511,19 +542,19 @@ function renderNameForm() {
     if (await rpc('set_my_name', { p_first: fn, p_last: ln })) {
       profile.name_confirmed = true;
       profile.full_name = fn + ' ' + ln;
-      renderUser();
+      route();
     }
   };
 }
 
 async function init(session) {
-  if (!session) { profile = null; applyTheme(); return renderLogin(); }
+  if (!session) { profile = null; tab = 'ingressi'; document.body.style.paddingBottom = ''; applyTheme(); return renderLogin(); }
   const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (error) { toast(error.message); return renderLogin(); }
   profile = data;
   applyTheme();
   if (!profile.name_confirmed) return renderNameForm();
-  renderUser();
+  route();
 }
 
 sb.auth.onAuthStateChange((event, session) => {
