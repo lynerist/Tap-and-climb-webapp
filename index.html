@@ -177,8 +177,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   .actions { display:flex; gap:8px; }
   /* Menù a tab (solo admin) */
   nav { position:fixed; bottom:0; left:0; right:0; z-index:5; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
-  nav button { flex:1; background:transparent; color:var(--muted); border-radius:0; padding:14px 8px; font-size:15px; }
-  nav button.on { color:var(--accent); font-weight:600; }
+  nav button.ghost { flex:1; background:transparent; color:var(--muted); border:0; border-radius:0; padding:14px 8px; font-size:15px; }
+  nav button.ghost.on { color:var(--accent); font-weight:600; }
   /* Informativa privacy */
   #pfoot { text-align:center; padding:8px 16px 28px; }
   #pfoot a { color:var(--muted); font-size:13px; text-decoration:none; }
@@ -405,8 +405,8 @@ function renderLogin() {
 function shell(inner) {
   const admin = !!profile.is_admin;   // il menù a tab esiste solo per gli admin
   const nav = admin ? `<nav>
-      <button data-tab="ingressi" class="${tab === 'ingressi' ? 'on' : ''}">🧗 Ingressi</button>
-      <button data-tab="pareti" class="${tab === 'pareti' ? 'on' : ''}">🧱 Pareti</button>
+      <button data-tab="ingressi" class="ghost ${tab === 'ingressi' ? 'on' : ''}">🎟️ Ingressi</button>
+      <button data-tab="pareti" class="ghost ${tab === 'pareti' ? 'on' : ''}">🧗 Pareti</button>
     </nav>` : '';
   document.body.style.paddingBottom = admin ? '64px' : '';
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
