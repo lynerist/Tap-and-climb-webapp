@@ -39,20 +39,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 20 q15 -10 30 0 t30 0 t30 0 t30 0' fill='none' stroke='%23194a68' stroke-width='3'/%3E%3Cpath d='M0 80 q15 -10 30 0 t30 0 t30 0 t30 0' fill='none' stroke='%23194a68' stroke-width='3'/%3E%3Cg transform='translate(70 50)'%3E%3Cellipse rx='12' ry='7' fill='%23ff9a3c'/%3E%3Cpath d='M-10 0 L-22 -7 L-22 7 Z' fill='%23ff7a1a'/%3E%3Ccircle cx='6' cy='-1.5' r='1.5' fill='%231d3557'/%3E%3C/g%3E%3Cg transform='translate(25 105) scale(.7)'%3E%3Cellipse rx='12' ry='7' fill='%23ffb870'/%3E%3Cpath d='M-10 0 L-22 -7 L-22 7 Z' fill='%23ff9a3c'/%3E%3Ccircle cx='6' cy='-1.5' r='1.5' fill='%231d3557'/%3E%3C/g%3E%3C/svg%3E");
     background-attachment: fixed;
   }
-  :root[data-theme="cai"] {
-    --bg:#0a2342; --card:#11335e; --text:#eaf2fb; --muted:#93b0d1; --accent:#3aa0e8; --line:#1f4a7e;
-    color-scheme: dark;
-  }
-  :root[data-theme="cai"] body {
-    background: linear-gradient(180deg,#0a2342,#10407a) fixed;
-  }
-  /* CAI: logo nell'intestazione (su riquadro bianco) e filigrana chiara sullo sfondo */
-  :root[data-theme="cai"] .brand img { content:url("img/logo-cai.png"); background:#fff; padding:2px; object-fit:contain; border-radius:8px; }
-  :root[data-theme="cai"] body::before {
-    content:""; position:fixed; left:50%; bottom:-60px; width:min(100vw,460px); aspect-ratio:1; transform:translateX(-50%);
-    background:url("img/logo-cai.png") center/contain no-repeat; filter:grayscale(1) invert(1);
-    mix-blend-mode:screen; opacity:.24; pointer-events:none; z-index:-1;
-  }
   :root[data-theme="magikarp"] {
     --bg:#14202b; --card:rgba(18,28,38,.90); --text:#eef2f4; --muted:#a3b3bd; --accent:#3fb8c9; --line:#2c4150;
     color-scheme: dark;
@@ -60,14 +46,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   :root[data-theme="magikarp"] body {
     background-image: linear-gradient(rgba(8,16,24,.50), rgba(8,16,24,.50)), url("img/tema-magikarp.jpg");
     background-size: cover; background-position: center top; background-attachment: fixed;
-  }
-  :root[data-theme="palestra"] {
-    --bg:#1f2328; --card:#2a2f36; --text:#eceff3; --muted:#9aa2ad; --accent:#ff6a3d; --line:#3a414a;
-    color-scheme: dark;
-  }
-  :root[data-theme="palestra"] body {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='%23394049'%3E%3Ccircle cx='15' cy='15' r='2'/%3E%3Ccircle cx='95' cy='15' r='2'/%3E%3Ccircle cx='15' cy='95' r='2'/%3E%3Ccircle cx='95' cy='95' r='2'/%3E%3Ccircle cx='55' cy='135' r='2'/%3E%3Ccircle cx='135' cy='55' r='2'/%3E%3C/g%3E%3Cg fill-opacity='.85'%3E%3Cpath d='M30 40 q10 -14 26 -6 q12 8 4 20 q-14 10 -28 2 z' fill='%23e4572e'/%3E%3Cellipse cx='115' cy='28' rx='14' ry='9' transform='rotate(-25 115 28)' fill='%23f2b705'/%3E%3Cpath d='M105 105 q12 -12 28 -2 q8 12 -4 22 q-16 4 -26 -6 z' fill='%232a9d8f'/%3E%3Cellipse cx='40' cy='118' rx='10' ry='14' transform='rotate(20 40 118)' fill='%23457b9d'/%3E%3Cpath d='M72 72 l14 -6 l8 12 l-14 8 z' fill='%238e5ea2'/%3E%3C/g%3E%3C/svg%3E");
-    background-attachment: fixed;
   }
   :root[data-theme="albero"] {
     --bg:#cfe8f7; --card:rgba(255,255,255,.92); --text:#1c2a1f; --muted:#5d7466; --accent:#3f8f4a; --line:#bcd6c4;
@@ -197,8 +175,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', cai:'CAI ⛰️', magikarp:'Magikarp 🌊', palestra:'Palestra 🧗', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', cai:'#0a2342', magikarp:'#14202b', palestra:'#1f2328', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', magikarp:'Magikarp 🌊', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', magikarp:'#14202b', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317' };
 function currentTheme() {
   if (!profile) return 'auto';
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
@@ -210,7 +188,7 @@ function currentTheme() {
   return 'auto';
 }
 // 'casuale': ogni giorno un tema diverso (uguale per tutta la giornata, ora italiana), scelto tra quelli decorativi
-const RANDOM_POOL = ['rosa','pesce','cai','magikarp','palestra','albero','turchese','gattini','disco','girasoli'];
+const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli'];
 function themeOfTheDay() {
   const day = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
   const key = day + (profile ? profile.id : '');
