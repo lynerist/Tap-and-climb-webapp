@@ -219,8 +219,18 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
 const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', magikarp:'Magikarp 🌊', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻', porcini:'Porcini 🍄', natale:'Natale 🎄', halloween:'Halloween 🎃', aprile:'Pesce d\'aprile 🐠', cervino:'Cervino ⛰️' };
 const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', magikarp:'#14202b', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317', porcini:'#1e1a12', natale:'#1b2a52', halloween:'#1a1038', aprile:'#7fd3f0', cervino:'#1d2b5a' };
+// Temi di stagione: valgono per tutti e hanno la precedenza su quello personale (ora italiana)
+function seasonalTheme() {
+  const md = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' }).slice(5);   // 'MM-DD'
+  if (md >= '10-25' && md <= '10-31') return 'halloween';
+  if (md >= '12-23' || md <= '01-06') return 'natale';
+  if (md === '04-01') return 'aprile';
+  return null;
+}
 function currentTheme() {
   if (!profile) return 'auto';
+  const season = seasonalTheme();
+  if (season) return season;
   if (profile.theme && THEMES[profile.theme]) return profile.theme;
   if (profile.can_switch_theme) {
     let t = null;
@@ -230,7 +240,7 @@ function currentTheme() {
   return 'auto';
 }
 // 'casuale': ogni giorno un tema diverso (uguale per tutta la giornata, ora italiana), scelto tra quelli decorativi
-const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli'];
+const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli','porcini','natale','halloween','aprile','cervino'];
 function themeOfTheDay() {
   const day = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
   const key = day + (profile ? profile.id : '');
