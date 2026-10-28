@@ -471,6 +471,8 @@ const WALL_INFO = {
   10: 'Pannello inclinato a 45°. La Decoy Board è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i boulder si scelgono dall\'app Decoyboard.',
   11: 'Pannello inclinato a 25°. La MoonBoard è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i boulder si scelgono dall\'app MoonBoard.'
 };
+// Avvisi in evidenza in cima alla pagina di una parete
+const WALL_ALERT = { 4: 'Obbligatorio usare come piedi solo le piccole prese bianche.' };
 // Link di download delle app dei pannelli
 const WALL_APPS = {
   10: { ios:'https://apps.apple.com/us/app/decoy-board/id1539249879', android:'https://play.google.com/store/apps/details?id=com.auroraclimbing.decoyboard', name:'Decoyboard' },
@@ -587,7 +589,7 @@ async function renderParete(n, edit = null) {
     return;
   }
 
-  body.innerHTML = `${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<button class="big" id="fadd">＋ Aggiungi giro</button>
+  body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<button class="big" id="fadd">＋ Aggiungi giro</button>
     <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
