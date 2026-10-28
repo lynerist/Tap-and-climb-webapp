@@ -502,12 +502,37 @@ function renderPareti() {
   });
 }
 
-// Pagina di una singola parete (bozza): "Indietro" a sinistra, nome della parete a destra, sotto il riquadro del contenuto
+// Giri per parete, da caimerate.it/giri-palestra (grotta esclusa: rifatta). [nome, grado, forma c/q/t, colore, nota]
+const COLORS = { verde:'#2e9e4f', arancio:'#f28a1a', giallo:'#f2d21b', blu:'#1f4fd1', nero:'#111111', azzurro:'#4db8f0', rosso:'#d93030', fucsia:'#e0189a', 'verde chiaro':'#8fd96b', 'verde scuro':'#1b6b34', viola:'#8a3fd1', marrone:'#8a5a32', beige:'#e8d6b0', rosa:'#f59ac0', bianco:'#ffffff' };
+const SHAPE_NAMES = { c:'cerchio', q:'quadrato', t:'triangolo' };
+const GIRI = {
+  1: [['Tantum','6a','c','verde'], ['Antimedale','6a','c','fucsia'], ['Cacio e pepe','6a+','c','giallo'], ['Geroglifici','6a+','c','blu'], ['Medale','6b','c','arancio']],
+  2: [['Verdefoglia','6a','t','verde'], ['Pietra Solare','6a','q','arancio'], ['Panino al salame','6a+','t','giallo'], ['Celestopoli','6a+','t','blu'], ['Erasmus a Bolzano','6b+','q','nero'], ['Giro degli Scout','6b+','c','azzurro'], ['Rossofuoco','6b+','q','rosso']],
+  3: [['Balz the start','6a','q','verde'], ['Ametista','6a+','t','viola'], ['Io sono Groot','6b','t','rosa'], ['Scaldo intenso','6b+','c','blu'], ['Mal di dita','6b+','q','rosso'], ['Appendix','6b+','c','giallo','dal top al top'], ['Moka','6c','q','bianco']],
+  5: [['No satisfaction','6a+','t','arancio'], ['Equilibrio ad incastro','6b','c','marrone'], ['Giro ad personam','6b+','q','viola'], ['Pan per focaccia','6b+','q','beige'], ['Tutti pazzi per Michi','6c','t','giallo'], ['Spring','6c+','q','verde'], ['Ti sfido a partire','7a','c','blu']],
+  7: [['Dai che sono tutte buone','6b','c','azzurro'], ['Iron Climbex','6c+','c','viola'], ['Climbers doppio malto','7a+','q','nero'], ['Profondo rosso','','t','rosso'], ['Dura Dura','','c','verde'], ['Banana Joe','','q','arancio']],
+  8: [['Red flags','6b','t','rosso'], ['Licheni','6b','c','verde chiaro'], ['Liquirizia','6b+','c','nero'], ['Aeonium','6c','q','viola'], ['Barba e capelli','7a+','c','verde scuro'], ['Un pensiero per Daniela','7a+','c','giallo']],
+  9: [['Via Normale','6a+','t','verde chiaro'], ['Prato fiorito','6a+','q','verde scuro'], ['Michimagò','6c','t','viola'], ['Dülfer','','c','blu']]
+};
+function shapeIcon(sh, color) {
+  const f = COLORS[color] || '#888', a = `fill="${f}" stroke="var(--muted)" stroke-width="1.2"`;
+  const g = sh === 'c' ? `<circle cx="11" cy="11" r="8" ${a}/>` : sh === 'q' ? `<rect x="3" y="3" width="16" height="16" rx="1.5" ${a}/>` : `<polygon points="11,2.5 20,19 2,19" stroke-linejoin="round" ${a}/>`;
+  return `<svg viewBox="0 0 22 22" width="26" height="26" style="flex:none" role="img" aria-label="${SHAPE_NAMES[sh]} ${color}">${g}</svg>`;
+}
+
+// Pagina di una singola parete: "Indietro" a sinistra, nome a destra, sotto l'elenco dei giri
 function renderParete(n) {
+  const giri = GIRI[n] || [];
+  const list = giri.length ? giri.map(g => `<div class="row" style="justify-content:flex-start;gap:12px">
+      ${shapeIcon(g[2], g[3])}
+      <div style="flex:1;min-width:0"><b>${esc(g[0])}</b><div class="muted">${esc(SHAPE_NAMES[g[2]])} ${esc(g[3])}${g[4] ? ' · ' + esc(g[4]) : ''}</div></div>
+      <span class="badge" style="font-size:14px;font-weight:700">${g[1] ? esc(g[1]) : '—'}</span></div>`).join('')
+    : '<p class="muted">Nessun giro in elenco.</p>';
   shell(`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
       <button class="ghost" id="wback">← Indietro</button>
       <h2 style="margin:0;font-size:20px;text-align:right">${esc(WALL_NAMES[n] || 'Parete ' + n)}</h2></div>
-    <div class="card" style="min-height:50vh"><p class="muted">Contenuto in preparazione.</p></div>`);
+    <div class="card" style="min-height:50vh">${list}</div>
+    ${giri.length ? '<p class="muted" style="text-align:center">Fonte: caimerate.it/giri-palestra</p>' : ''}`);
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 }
 
