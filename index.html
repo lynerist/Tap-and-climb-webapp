@@ -433,28 +433,15 @@ function route() {
 }
 
 // ---------- Tab "Pareti" (solo admin): palestra vista dall'alto ----------
-// Prima bozza: le 7 pareti sono numerate lungo il perimetro del blocco centrale,
-// grotta e pannelli sono in posizione indicativa.
+// Bozza: il blocco centrale ha tutti i lati dritti e ogni lato (parete) ha il suo numero, in senso orario dal lato sinistro.
 function renderPareti() {
-  const walls = [   // [x1, y1, x2, y2, etichetta x, etichetta y]
-    [89,114, 99,222, 112,168],
-    [99,222, 109,330, 122,276],
-    [109,330, 204,326, 156,314],
-    [204,326, 202,250, 191,288],
-    [180,244, 171,169, 160,206],
-    [190,163, 186,106, 176,135],
-    [186,106, 89,114, 138,124]
-  ];
-  const panels = [[50,22, 56,98], [120,24, 190,22], [212,26, 284,24]];
-  const svg = `<svg viewBox="0 0 320 350" style="width:100%;height:auto;display:block" role="img" aria-label="Pianta della palestra vista dall'alto">
-    ${panels.map((q, i) => `<line x1="${q[0]}" y1="${q[1]}" x2="${q[2]}" y2="${q[3]}" stroke="var(--muted)" stroke-width="6" stroke-linecap="round"/>
-      <text x="${(q[0] + q[2]) / 2 + (i === 0 ? 12 : 0)}" y="${(q[1] + q[3]) / 2 + (i === 0 ? 4 : 16)}" font-size="9" text-anchor="middle" fill="var(--muted)">Pannello ${i + 1}</text>`).join('')}
-    <polygon points="89,114 186,106 190,163 173,162 180,244 202,250 204,326 109,330" fill="var(--line)" fill-opacity=".45" stroke="var(--muted)" stroke-width="1.5" stroke-linejoin="round"/>
-    ${walls.map(w => `<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>`).join('')}
-    <ellipse cx="146" cy="218" rx="20" ry="14" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>
-    <text x="146" y="221" font-size="9" text-anchor="middle" fill="var(--muted)">grotta</text>
-    ${walls.map((w, i) => `<circle cx="${w[4]}" cy="${w[5]}" r="8" fill="var(--accent)"/>
-      <text x="${w[4]}" y="${w[5] + 3.5}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>`).join('')}
+  const pts = [[90,260],[90,60],[190,60],[190,115],[168,115],[168,195],[210,195],[210,260]];
+  const walls = pts.map((p, i) => { const q = pts[(i + 1) % pts.length]; return [p[0], p[1], q[0], q[1]]; });
+  const svg = `<svg viewBox="65 35 170 250" style="width:100%;max-width:360px;margin:0 auto;height:auto;display:block" role="img" aria-label="Pianta della palestra vista dall'alto">
+    <polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="var(--line)" fill-opacity=".45"/>
+    ${walls.map(w => `<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}" stroke="var(--accent)" stroke-width="5" stroke-linecap="square"/>`).join('')}
+    ${walls.map((w, i) => { const x = (w[0] + w[2]) / 2, y = (w[1] + w[3]) / 2; return `<circle cx="${x}" cy="${y}" r="8" fill="var(--accent)" stroke="var(--card)" stroke-width="1.5"/>
+      <text x="${x}" y="${y + 3.5}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>`; }).join('')}
   </svg>`;
   shell(`<div class="card"><h2>Palestra vista dall'alto</h2>${svg}</div>`);
 }
