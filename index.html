@@ -160,7 +160,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   button.big { width:100%; font-size:18px; padding:16px; }
   button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 12px; }
   button.ok { background:var(--ok); } button.bad { background:var(--bad); }
-  input { width:100%; font:inherit; padding:12px; margin-bottom:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); }
+  input, select { width:100%; font:inherit; padding:12px; margin-bottom:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--text); }
   button:disabled { opacity:.5; cursor:not-allowed; }
   .center { text-align:center; padding-top:15vh; }
   .muted { color:var(--muted); font-size:14px; }
@@ -502,37 +502,71 @@ function renderPareti() {
   });
 }
 
-// Giri per parete, da caimerate.it/giri-palestra (grotta esclusa: rifatta). [nome, grado, forma c/q/t, colore, nota]
+// Giri delle pareti: salvati nella tabella "routes" di Supabase (solo admin). Forme: c = cerchio, q = quadrato, t = triangolo.
 const COLORS = { verde:'#2e9e4f', arancio:'#f28a1a', giallo:'#f2d21b', blu:'#1f4fd1', nero:'#111111', azzurro:'#4db8f0', rosso:'#d93030', fucsia:'#e0189a', 'verde chiaro':'#8fd96b', 'verde scuro':'#1b6b34', viola:'#8a3fd1', marrone:'#8a5a32', beige:'#e8d6b0', rosa:'#f59ac0', bianco:'#ffffff' };
 const SHAPE_NAMES = { c:'cerchio', q:'quadrato', t:'triangolo' };
-const GIRI = {
-  1: [['Tantum','6a','c','verde'], ['Antimedale','6a','c','fucsia'], ['Cacio e pepe','6a+','c','giallo'], ['Geroglifici','6a+','c','blu'], ['Medale','6b','c','arancio']],
-  2: [['Verdefoglia','6a','t','verde'], ['Pietra Solare','6a','q','arancio'], ['Panino al salame','6a+','t','giallo'], ['Celestopoli','6a+','t','blu'], ['Erasmus a Bolzano','6b+','q','nero'], ['Giro degli Scout','6b+','c','azzurro'], ['Rossofuoco','6b+','q','rosso']],
-  3: [['Balz the start','6a','q','verde'], ['Ametista','6a+','t','viola'], ['Io sono Groot','6b','t','rosa'], ['Scaldo intenso','6b+','c','blu'], ['Mal di dita','6b+','q','rosso'], ['Appendix','6b+','c','giallo','dal top al top'], ['Moka','6c','q','bianco']],
-  5: [['No satisfaction','6a+','t','arancio'], ['Equilibrio ad incastro','6b','c','marrone'], ['Giro ad personam','6b+','q','viola'], ['Pan per focaccia','6b+','q','beige'], ['Tutti pazzi per Michi','6c','t','giallo'], ['Spring','6c+','q','verde'], ['Ti sfido a partire','7a','c','blu']],
-  7: [['Dai che sono tutte buone','6b','c','azzurro'], ['Iron Climbex','6c+','c','viola'], ['Climbers doppio malto','7a+','q','nero'], ['Profondo rosso','','t','rosso'], ['Dura Dura','','c','verde'], ['Banana Joe','','q','arancio']],
-  8: [['Red flags','6b','t','rosso'], ['Licheni','6b','c','verde chiaro'], ['Liquirizia','6b+','c','nero'], ['Aeonium','6c','q','viola'], ['Barba e capelli','7a+','c','verde scuro'], ['Un pensiero per Daniela','7a+','c','giallo']],
-  9: [['Via Normale','6a+','t','verde chiaro'], ['Prato fiorito','6a+','q','verde scuro'], ['Michimagò','6c','t','viola'], ['Dülfer','','c','blu']]
-};
 function shapeIcon(sh, color) {
   const f = COLORS[color] || '#888', a = `fill="${f}" stroke="var(--muted)" stroke-width="1.2"`;
   const g = sh === 'c' ? `<circle cx="11" cy="11" r="8" ${a}/>` : sh === 'q' ? `<rect x="3" y="3" width="16" height="16" rx="1.5" ${a}/>` : `<polygon points="11,2.5 20,19 2,19" stroke-linejoin="round" ${a}/>`;
-  return `<svg viewBox="0 0 22 22" width="26" height="26" style="flex:none" role="img" aria-label="${SHAPE_NAMES[sh]} ${color}">${g}</svg>`;
+  return `<svg viewBox="0 0 22 22" width="26" height="26" style="flex:none" role="img" aria-label="${SHAPE_NAMES[sh]} ${esc(color)}">${g}</svg>`;
 }
 
-// Pagina di una singola parete: "Indietro" a sinistra, nome a destra, sotto l'elenco dei giri
-function renderParete(n) {
-  const giri = GIRI[n] || [];
-  const list = giri.length ? giri.map(g => `<div class="row" style="justify-content:flex-start;gap:12px">
-      ${shapeIcon(g[2], g[3])}
-      <div style="flex:1;min-width:0"><b>${esc(g[0])}</b><div class="muted">${esc(SHAPE_NAMES[g[2]])} ${esc(g[3])}${g[4] ? ' · ' + esc(g[4]) : ''}</div></div>
-      <span class="badge" style="font-size:14px;font-weight:700">${g[1] ? esc(g[1]) : '—'}</span></div>`).join('')
-    : '<p class="muted">Nessun giro in elenco.</p>';
+// Pagina di una singola parete: "Indietro" a sinistra, nome a destra, sotto l'elenco dei giri (si aggiungono, modificano e tolgono da qui)
+async function renderParete(n, edit = null) {
+  n = String(n);
   shell(`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
       <button class="ghost" id="wback">← Indietro</button>
       <h2 style="margin:0;font-size:20px;text-align:right">${esc(WALL_NAMES[n] || 'Parete ' + n)}</h2></div>
-    <div class="card" style="min-height:50vh">${list}</div>`);
+    <div class="card" id="wbody" style="min-height:50vh"><p class="muted">Caricamento…</p></div>`);
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
+
+  const { data, error } = await sb.from('routes').select('*').eq('wall', Number(n)).order('position').order('created_at');
+  if (tab !== 'pareti' || wallOpen !== n) return;   // nel frattempo hai cambiato pagina
+  const body = document.getElementById('wbody');
+  if (error) { body.innerHTML = '<p class="muted">Impossibile caricare i giri.</p>'; return toast(error.message); }
+  const giri = data || [];
+
+  if (edit) {
+    const r = edit === 'new' ? null : giri.find(g => g.id === edit);
+    const v = k => esc(r ? (r[k] ?? '') : '');
+    body.innerHTML = `<h2>${r ? 'Modifica giro' : 'Nuovo giro'}</h2>
+      <input id="fname" placeholder="Nome del giro" value="${v('name')}" autocomplete="off">
+      <input id="fgrade" placeholder="Grado (es. 6a+, vuoto se non indicato)" value="${v('grade')}" autocomplete="off" autocapitalize="none">
+      <select id="fshape">${Object.entries(SHAPE_NAMES).map(([k, t]) => `<option value="${k}" ${r && r.shape === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <select id="fcolor">${Object.keys(COLORS).map(c => `<option value="${c}" ${r && r.color === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+      <input id="fnote" placeholder="Nota (facoltativa)" value="${v('note')}" autocomplete="off">
+      <div class="actions"><button class="big ok" id="fsave">Salva</button><button class="ghost" id="fcancel">Annulla</button></div>
+      ${r ? '<p style="text-align:center"><button class="ghost" id="fdel" style="color:var(--bad)">Elimina giro</button></p>' : ''}`;
+    document.getElementById('fcancel').onclick = () => renderParete(n);
+    document.getElementById('fsave').onclick = async ev => {
+      const name = document.getElementById('fname').value.trim();
+      if (!name) return toast('Inserisci il nome del giro');
+      const row = { wall: Number(n), name, grade: document.getElementById('fgrade').value.trim() || null,
+        shape: document.getElementById('fshape').value, color: document.getElementById('fcolor').value,
+        note: document.getElementById('fnote').value.trim() || null };
+      ev.currentTarget.disabled = true;
+      const { error: e } = r ? await sb.from('routes').update(row).eq('id', r.id)
+        : await sb.from('routes').insert({ ...row, position: giri.reduce((m, g) => Math.max(m, g.position), 0) + 1 });
+      if (e) { toast(e.message); ev.currentTarget.disabled = false; return; }
+      toast('Giro salvato ✅'); renderParete(n);
+    };
+    if (r) document.getElementById('fdel').onclick = async () => {
+      if (!confirm('Eliminare il giro "' + r.name + '"?')) return;
+      const { error: e } = await sb.from('routes').delete().eq('id', r.id);
+      if (e) return toast(e.message);
+      toast('Giro eliminato'); renderParete(n);
+    };
+    return;
+  }
+
+  body.innerHTML = `<button class="big" id="fadd">＋ Aggiungi giro</button>
+    <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px;cursor:pointer">
+      ${shapeIcon(g.shape, g.color)}
+      <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
+      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span><span class="muted" aria-hidden="true">✎</span></div>`).join('')
+      : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
+  document.getElementById('fadd').onclick = () => renderParete(n, 'new');
+  document.querySelectorAll('.wroute').forEach(el => el.onclick = () => renderParete(n, el.dataset.id));
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
