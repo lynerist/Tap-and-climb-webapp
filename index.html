@@ -428,13 +428,28 @@ function shell(inner) {
     <button class="ghost" id="inst">Installa</button></div></main>${nav}`;
   document.getElementById('out').onclick = logout;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.onclick = () => {
-    tab = b.dataset.tab; wallOpen = null;
     clearTimeout(renderUser._t);
-    route();
+    go(b.dataset.tab, null);
   });
   wireInstall();
   wireTheme();
 }
+
+// Navigazione con cronologia del browser: "indietro" torna alla schermata precedente invece di chiudere l'app
+function go(t, w) {
+  if (t === tab && w === wallOpen) return route();
+  tab = t; wallOpen = w;
+  try { history.pushState({ tab: t, wall: w }, ''); } catch (e) {}
+  route();
+}
+window.addEventListener('popstate', e => {
+  if (!profile) return;
+  const st = e.state || {};
+  tab = (st.tab === 'pareti' && profile.is_admin) ? 'pareti' : 'ingressi';
+  wallOpen = tab === 'pareti' ? (st.wall || null) : null;
+  clearTimeout(renderUser._t);
+  route();
+});
 
 // Mostra la schermata giusta in base alla tab (i non-admin vedono sempre "Ingressi")
 function route() {
@@ -479,7 +494,7 @@ function renderPareti() {
   // la pianta occupa tutta la pagina: niente margini né suggerimento di installazione
   document.querySelector('main').style.padding = '0';
   document.getElementById('instbox')?.remove();
-  const open = g => { wallOpen = g.dataset.w; route(); };
+  const open = g => go('pareti', g.dataset.w);
   document.querySelectorAll('.wall').forEach(g => {
     g.onclick = () => open(g);
     g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(g); } };
@@ -491,7 +506,7 @@ function renderParete(n) {
   shell(`<button class="ghost" id="wback">← Pianta</button>
     <div class="card" style="margin-top:12px"><h2>Parete ${esc(n)}</h2>
       <p class="muted">Pagina in preparazione.</p></div>`);
-  document.getElementById('wback').onclick = () => { wallOpen = null; route(); };
+  document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
@@ -611,6 +626,7 @@ async function init(session) {
   profile = data;
   applyTheme();
   if (!profile.name_confirmed) return renderNameForm();
+  try { history.replaceState({ tab: 'ingressi', wall: null }, ''); } catch (e) {}
   route();
 }
 
