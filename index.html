@@ -463,6 +463,7 @@ function route() {
 // Blocco centrale rettangolare (pareti 1-8) con la grotta (4) rientrata a destra: 5 e 3 sono allineate e uguali, 8 è lunga come la grotta.
 // Dietro: pannello 9 a sinistra e pannelli 10 e 11 sulla stessa linea, che occupano 2/3 della parete in alto.
 // Ogni parete è un link: si apre la sua pagina (per ora una bozza).
+const WALL_NAMES = { 1:'Spigolo nord ovest', 2:'Parete ovest', 3:'Spigolo sud ovest', 4:'Grotta', 5:'Spigolo sud est', 6:'Parete est', 7:'Spigolo nord est', 8:'Parete nord', 9:'Pinnacolo verde', 10:'Decoy Board', 11:'Moonboard' };
 function renderPareti() {
   const walls = [   // [numero, x1, y1, x2, y2]
     [1, 70,590, 70,459], [8, 70,459, 70,311], [7, 70,311, 70,180],
@@ -481,7 +482,7 @@ function renderPareti() {
     <path d="M260 311H238M238 459H260" stroke="var(--muted)" stroke-width="3" fill="none"/>
     ${walls.map(w => {
       const t = trim(w), x = (w[1] + w[3]) / 2, y = (w[2] + w[4]) / 2;
-      return `<g class="wall" data-w="${w[0]}" role="link" tabindex="0" aria-label="Apri parete ${w[0]}">
+      return `<g class="wall" data-w="${w[0]}" role="link" tabindex="0" aria-label="Apri ${esc(WALL_NAMES[w[0]])}">
         <line class="hit" x1="${t[0]}" y1="${t[1]}" x2="${t[2]}" y2="${t[3]}"/>
         <line class="bar" x1="${t[0]}" y1="${t[1]}" x2="${t[2]}" y2="${t[3]}" stroke="var(--accent)" stroke-width="8" stroke-linecap="butt"/>
         <circle class="pulse" cx="${x}" cy="${y}" r="15"/>
@@ -505,7 +506,7 @@ function renderPareti() {
 function renderParete(n) {
   shell(`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
       <button class="ghost" id="wback">← Indietro</button>
-      <h2 style="margin:0;font-size:20px">Parete ${esc(n)}</h2></div>
+      <h2 style="margin:0;font-size:20px;text-align:right">${esc(WALL_NAMES[n] || 'Parete ' + n)}</h2></div>
     <div class="card" style="min-height:50vh"><p class="muted">Contenuto in preparazione.</p></div>`);
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 }
