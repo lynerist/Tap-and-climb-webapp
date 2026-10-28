@@ -433,15 +433,22 @@ function route() {
 }
 
 // ---------- Tab "Pareti" (solo admin): palestra vista dall'alto ----------
-// Bozza: il blocco centrale ha tutti i lati dritti e ogni lato (parete) ha il suo numero, in senso orario dal lato sinistro.
+// Bozza: blocco centrale con pareti 1-8 (1/8/7 a sinistra, 2 sotto, 3/4/5 a destra, 6 sopra)
+// e dietro i pannelli 9, 10, 11. Gli scalini a destra non sono pareti.
 function renderPareti() {
-  const pts = [[90,260],[90,60],[190,60],[190,115],[168,115],[168,195],[210,195],[210,260]];
-  const walls = pts.map((p, i) => { const q = pts[(i + 1) % pts.length]; return [p[0], p[1], q[0], q[1]]; });
-  const svg = `<svg viewBox="65 35 170 250" style="width:100%;max-width:360px;margin:0 auto;height:auto;display:block" role="img" aria-label="Pianta della palestra vista dall'alto">
-    <polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="var(--line)" fill-opacity=".45"/>
-    ${walls.map(w => `<line x1="${w[0]}" y1="${w[1]}" x2="${w[2]}" y2="${w[3]}" stroke="var(--accent)" stroke-width="5" stroke-linecap="square"/>`).join('')}
-    ${walls.map((w, i) => { const x = (w[0] + w[2]) / 2, y = (w[1] + w[3]) / 2; return `<circle cx="${x}" cy="${y}" r="8" fill="var(--accent)" stroke="var(--card)" stroke-width="1.5"/>
-      <text x="${x}" y="${y + 3.5}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>`; }).join('')}
+  const walls = [   // [numero, x1, y1, x2, y2]
+    [1, 0,186, 0,130], [8, 0,130, 0,64], [7, 0,64, 0,0],
+    [6, 0,0, 77,0],
+    [5, 77,0, 77,64], [4, 69,64, 69,130], [3, 90,130, 90,186],
+    [2, 90,186, 0,186],
+    [9, -62,-102, -62,-24], [10, 54,-112, 113,-112], [11, 137,-115, 192,-115]
+  ];
+  const svg = `<svg viewBox="-75 -125 280 325" style="width:100%;max-width:380px;margin:0 auto;height:auto;display:block" role="img" aria-label="Pianta della palestra vista dall'alto">
+    <polygon points="0,0 77,0 77,64 69,64 69,130 90,130 90,186 0,186" fill="var(--line)" fill-opacity=".45"/>
+    <path d="M77 64H69M69 130H90" stroke="var(--muted)" stroke-width="2.5" fill="none"/>
+    ${walls.map(w => `<line x1="${w[1]}" y1="${w[2]}" x2="${w[3]}" y2="${w[4]}" stroke="var(--accent)" stroke-width="5" stroke-linecap="square"/>`).join('')}
+    ${walls.map(w => { const x = (w[1] + w[3]) / 2, y = (w[2] + w[4]) / 2; return `<circle cx="${x}" cy="${y}" r="8.5" fill="var(--accent)" stroke="var(--card)" stroke-width="1.5"/>
+      <text x="${x}" y="${y + 3.7}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#fff">${w[0]}</text>`; }).join('')}
   </svg>`;
   shell(`<div class="card"><h2>Palestra vista dall'alto</h2>${svg}</div>`);
 }
