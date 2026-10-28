@@ -467,6 +467,7 @@ function route() {
 const WALL_NAMES = { 1:'Spigolo nord ovest', 2:'Parete ovest', 3:'Spigolo sud ovest', 4:'Grotta', 5:'Spigolo sud est', 6:'Parete est', 7:'Spigolo nord est', 8:'Parete nord', 9:'Pinnacolo verde', 10:'Decoy Board', 11:'Moonboard' };
 // Descrizione mostrata in cima alla pagina di alcune pareti
 const WALL_INFO = {
+  6: 'Spray wall: una parete coperta di prese senza percorsi segnati. I problemi te li inventi tu, scegliendo le prese che vuoi usare.',
   10: 'Pannello inclinato a 45°. La Decoy Board è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app Decoyboard.',
   11: 'Pannello inclinato a 25°. La MoonBoard è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app MoonBoard.'
 };
@@ -478,7 +479,7 @@ const WALL_APPS = {
 // Rileva il telefono (iPadOS si presenta come Mac con touch)
 const isAndroid = () => /android/i.test(navigator.userAgent);
 const isApple = () => isIOS() || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-const NO_GIRI = ['10', '11'];   // pannelli senza giri: solo la descrizione
+const NO_GIRI = ['6', '10', '11'];   // pannelli senza giri: solo la descrizione
 function renderPareti() {
   const walls = [   // [numero, x1, y1, x2, y2]
     [1, 70,590, 70,459], [8, 70,459, 70,311], [7, 70,311, 70,180],
