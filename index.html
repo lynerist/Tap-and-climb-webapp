@@ -179,6 +179,17 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   nav { position:fixed; bottom:0; left:0; right:0; z-index:5; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
   nav button.ghost { flex:1; background:transparent; color:var(--muted); border:0; border-radius:0; padding:14px 8px; font-size:15px; }
   nav button.ghost.on { color:var(--accent); font-weight:600; }
+  /* Pareti cliccabili */
+  .wall { cursor:pointer; outline:none; -webkit-tap-highlight-color:transparent; }
+  .wall .hit { stroke:transparent; stroke-width:34; fill:none; }
+  .wall .bar { transition:stroke-width .15s; }
+  .wall .pulse { fill:var(--accent); opacity:0; transform-box:fill-box; transform-origin:center; animation:wpulse 2.4s ease-out infinite; }
+  .wall:hover .bar, .wall:focus-visible .bar { stroke-width:11; }
+  .wall:active { opacity:.7; }
+  .wall:focus-visible .badge { stroke:var(--text); stroke-width:3; }
+  @keyframes wpulse { 0% { transform:scale(1); opacity:.55; } 70%,100% { transform:scale(1.9); opacity:0; } }
+  @media (prefers-reduced-motion: reduce) { .wall .pulse { animation:none; } }
+  .whint { text-align:center; font-size:14px; color:var(--muted); padding:12px 16px 0; }
   /* Informativa privacy */
   #pfoot { text-align:center; padding:8px 16px 28px; }
   #pfoot a { color:var(--muted); font-size:13px; text-decoration:none; }
@@ -214,6 +225,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $app = document.getElementById('app');
 let profile = null;
 let tab = 'ingressi';   // 'ingressi' | 'pareti' (il menù è visibile solo agli admin)
+let wallOpen = null;    // parete aperta nella tab Pareti (null = pianta)
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
@@ -416,7 +428,7 @@ function shell(inner) {
     <button class="ghost" id="inst">Installa</button></div></main>${nav}`;
   document.getElementById('out').onclick = logout;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.onclick = () => {
-    tab = b.dataset.tab;
+    tab = b.dataset.tab; wallOpen = null;
     clearTimeout(renderUser._t);
     route();
   });
@@ -429,12 +441,13 @@ function route() {
   const pareti = !!(profile && profile.is_admin && tab === 'pareti');
   if (!pareti) tab = 'ingressi';
   document.getElementById('pfoot').style.display = pareti ? 'none' : '';   // informativa privacy: solo su Ingressi
-  return pareti ? renderPareti() : renderUser();
+  return pareti ? (wallOpen ? renderParete(wallOpen) : renderPareti()) : renderUser();
 }
 
 // ---------- Tab "Pareti" (solo admin): palestra vista dall'alto ----------
 // Blocco centrale rettangolare (pareti 1-8) con la grotta (4) rientrata a destra: 5 e 3 sono allineate e uguali, 8 è lunga come la grotta.
 // Dietro: pannello 9 a sinistra e pannelli 10 e 11 sulla stessa linea, che occupano 2/3 della parete in alto.
+// Ogni parete è un link: si apre la sua pagina (per ora una bozza).
 function renderPareti() {
   const walls = [   // [numero, x1, y1, x2, y2]
     [1, 70,590, 70,459], [8, 70,459, 70,311], [7, 70,311, 70,180],
@@ -448,17 +461,37 @@ function renderPareti() {
     const dx = w[3] - w[1], dy = w[4] - w[2], len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
     return [w[1] + ux * gap, w[2] + uy * gap, w[3] - ux * gap, w[4] - uy * gap];
   };
-  const svg = `<svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid meet" style="width:100%;height:calc(100vh - 125px);height:calc(100dvh - 125px);display:block" role="img" aria-label="Pianta della palestra vista dall'alto">
+  const svg = `<svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid meet" style="width:100%;height:calc(100vh - 170px);height:calc(100dvh - 170px);display:block" role="group" aria-label="Pianta della palestra vista dall'alto">
     <polygon points="70,180 260,180 260,311 238,311 238,459 260,459 260,590 70,590" fill="var(--line)" fill-opacity=".45"/>
     <path d="M260 311H238M238 459H260" stroke="var(--muted)" stroke-width="3" fill="none"/>
-    ${walls.map(w => { const t = trim(w); return `<line x1="${t[0]}" y1="${t[1]}" x2="${t[2]}" y2="${t[3]}" stroke="var(--accent)" stroke-width="7" stroke-linecap="butt"/>`; }).join('')}
-    ${walls.map(w => { const x = (w[1] + w[3]) / 2, y = (w[2] + w[4]) / 2; return `<circle cx="${x}" cy="${y}" r="12" fill="var(--accent)" stroke="var(--card)" stroke-width="2"/>
-      <text x="${x}" y="${y + 4.5}" font-size="13" font-weight="700" text-anchor="middle" fill="#fff">${w[0]}</text>`; }).join('')}
+    ${walls.map(w => {
+      const t = trim(w), x = (w[1] + w[3]) / 2, y = (w[2] + w[4]) / 2;
+      return `<g class="wall" data-w="${w[0]}" role="link" tabindex="0" aria-label="Apri parete ${w[0]}">
+        <line class="hit" x1="${t[0]}" y1="${t[1]}" x2="${t[2]}" y2="${t[3]}"/>
+        <line class="bar" x1="${t[0]}" y1="${t[1]}" x2="${t[2]}" y2="${t[3]}" stroke="var(--accent)" stroke-width="8" stroke-linecap="butt"/>
+        <circle class="pulse" cx="${x}" cy="${y}" r="15"/>
+        <circle class="badge" cx="${x}" cy="${y}" r="15" fill="var(--accent)" stroke="var(--card)" stroke-width="2.5"/>
+        <text x="${x}" y="${y + 5.5}" font-size="16" font-weight="700" text-anchor="middle" fill="#fff" pointer-events="none">${w[0]}</text>
+      </g>`;
+    }).join('')}
   </svg>`;
-  shell(svg);
+  shell(`<div class="whint">👆 Tocca una parete per aprirla</div>${svg}`);
   // la pianta occupa tutta la pagina: niente margini né suggerimento di installazione
   document.querySelector('main').style.padding = '0';
   document.getElementById('instbox')?.remove();
+  const open = g => { wallOpen = g.dataset.w; route(); };
+  document.querySelectorAll('.wall').forEach(g => {
+    g.onclick = () => open(g);
+    g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(g); } };
+  });
+}
+
+// Pagina di una singola parete (bozza)
+function renderParete(n) {
+  shell(`<button class="ghost" id="wback">← Pianta</button>
+    <div class="card" style="margin-top:12px"><h2>Parete ${esc(n)}</h2>
+      <p class="muted">Pagina in preparazione.</p></div>`);
+  document.getElementById('wback').onclick = () => { wallOpen = null; route(); };
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
@@ -572,7 +605,7 @@ function renderNameForm() {
 }
 
 async function init(session) {
-  if (!session) { profile = null; tab = 'ingressi'; document.body.style.paddingBottom = ''; document.getElementById('pfoot').style.display = ''; applyTheme(); return renderLogin(); }
+  if (!session) { profile = null; tab = 'ingressi'; wallOpen = null; document.body.style.paddingBottom = ''; document.getElementById('pfoot').style.display = ''; applyTheme(); return renderLogin(); }
   const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (error) { toast(error.message); return renderLogin(); }
   profile = data;
