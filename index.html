@@ -563,7 +563,7 @@ async function renderParete(n, edit = null) {
     <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
-      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span><span class="muted" aria-hidden="true">✎</span></div>`).join('')
+      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span></div>`).join('')
       : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
   document.getElementById('fadd').onclick = () => renderParete(n, 'new');
   document.querySelectorAll('.wroute').forEach(el => el.onclick = () => renderParete(n, el.dataset.id));
