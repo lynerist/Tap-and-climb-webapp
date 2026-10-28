@@ -505,6 +505,9 @@ function renderPareti() {
 // Giri delle pareti: salvati nella tabella "routes" di Supabase (solo admin). Forme: c = cerchio, q = quadrato, t = triangolo, e = esagono.
 const COLORS = { verde:'#2e9e4f', arancio:'#f28a1a', giallo:'#f2d21b', blu:'#1f4fd1', nero:'#111111', azzurro:'#4db8f0', rosso:'#d93030', fucsia:'#e0189a', 'verde chiaro':'#8fd96b', 'verde scuro':'#1b6b34', viola:'#8a3fd1', marrone:'#8a5a32', beige:'#e8d6b0', rosa:'#f59ac0', bianco:'#ffffff' };
 const SHAPE_NAMES = { c:'cerchio', q:'quadrato', t:'triangolo', e:'esagono' };
+// Scala francese, dal 5c in su
+const GRADES = ['5c','6a','6a+','6b','6b+','6c','6c+','7a','7a+','7b','7b+','7c','7c+','8a','8a+','8b','8b+','8c','8c+','9a','9a+','9b','9b+','9c'];
+const gradeRank = g => { const i = GRADES.indexOf(g); return g ? (i < 0 ? -1 : i) : 999; };   // senza grado in fondo
 function shapeIcon(sh, color) {
   const f = COLORS[color] || '#888', a = `fill="${f}" stroke="var(--muted)" stroke-width="1.2"`;
   const g = sh === 'e' ? `<polygon points="11,2 18.8,6.5 18.8,15.5 11,20 3.2,15.5 3.2,6.5" stroke-linejoin="round" ${a}/>` : sh === 'c' ? `<circle cx="11" cy="11" r="8" ${a}/>` : sh === 'q' ? `<rect x="3" y="3" width="16" height="16" rx="1.5" ${a}/>` : `<polygon points="11,2.5 20,19 2,19" stroke-linejoin="round" ${a}/>`;
@@ -524,14 +527,14 @@ async function renderParete(n, edit = null) {
   if (tab !== 'pareti' || wallOpen !== n) return;   // nel frattempo hai cambiato pagina
   const body = document.getElementById('wbody');
   if (error) { body.innerHTML = '<p class="muted">Impossibile caricare i giri.</p>'; return toast(error.message); }
-  const giri = data || [];
+  const giri = (data || []).slice().sort((a, b) => gradeRank(a.grade) - gradeRank(b.grade) || a.position - b.position || a.name.localeCompare(b.name));
 
   if (edit) {
     const r = edit === 'new' ? null : giri.find(g => g.id === edit);
     const v = k => esc(r ? (r[k] ?? '') : '');
     body.innerHTML = `<h2>${r ? 'Modifica giro' : 'Nuovo giro'}</h2>
       <input id="fname" placeholder="Nome del giro" value="${v('name')}" autocomplete="off">
-      <input id="fgrade" placeholder="Grado (es. 6a+, vuoto se non indicato)" value="${v('grade')}" autocomplete="off" autocapitalize="none">
+      <select id="fgrade"><option value="">Grado non indicato</option>${(r && r.grade && !GRADES.includes(r.grade) ? [r.grade] : []).concat(GRADES).map(x => `<option value="${esc(x)}" ${r && r.grade === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>
       <select id="fshape">${Object.entries(SHAPE_NAMES).map(([k, t]) => `<option value="${k}" ${r && r.shape === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <select id="fcolor">${Object.keys(COLORS).map(c => `<option value="${c}" ${r && r.color === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
       <input id="fnote" placeholder="Nota (facoltativa)" value="${v('note')}" autocomplete="off">
