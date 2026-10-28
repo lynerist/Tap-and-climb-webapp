@@ -531,8 +531,7 @@ function renderParete(n) {
   shell(`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px">
       <button class="ghost" id="wback">← Indietro</button>
       <h2 style="margin:0;font-size:20px;text-align:right">${esc(WALL_NAMES[n] || 'Parete ' + n)}</h2></div>
-    <div class="card" style="min-height:50vh">${list}</div>
-    ${giri.length ? '<p class="muted" style="text-align:center">Fonte: caimerate.it/giri-palestra</p>' : ''}`);
+    <div class="card" style="min-height:50vh">${list}</div>`);
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 }
 
