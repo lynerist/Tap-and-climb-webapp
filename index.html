@@ -470,6 +470,14 @@ const WALL_INFO = {
   10: 'Pannello inclinato a 45°. La Decoy Board è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app Decoyboard.',
   11: 'Pannello inclinato a 25°. La MoonBoard è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app MoonBoard.'
 };
+// Link di download delle app dei pannelli
+const WALL_APPS = {
+  10: { ios:'https://apps.apple.com/us/app/decoy-board/id1539249879', android:'https://play.google.com/store/apps/details?id=com.auroraclimbing.decoyboard', name:'Decoyboard' },
+  11: { ios:'https://apps.apple.com/us/app/moon-board/id6446842142', android:'https://play.google.com/store/apps/details?id=com.trainingboard.moon', name:'MoonBoard' }
+};
+// Rileva il telefono (iPadOS si presenta come Mac con touch)
+const isAndroid = () => /android/i.test(navigator.userAgent);
+const isApple = () => isIOS() || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 const NO_GIRI = ['10', '11'];   // pannelli senza giri: solo la descrizione
 function renderPareti() {
   const walls = [   // [numero, x1, y1, x2, y2]
@@ -531,7 +539,12 @@ async function renderParete(n, edit = null) {
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 
   if (NO_GIRI.includes(n)) {
-    document.getElementById('wbody').innerHTML = `<p style="margin:0;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n] || '')}</p>`;
+    const app = WALL_APPS[n];
+    // su iPhone/iPad solo App Store, su Android solo Google Play; altrove (computer) entrambi
+    const stores = !app ? [] : isApple() ? [['ios', 'Scarica per iPhone']] : isAndroid() ? [['android', 'Scarica per Android']] : [['ios', 'Scarica per iPhone'], ['android', 'Scarica per Android']];
+    document.getElementById('wbody').innerHTML = `<p style="margin:0 0 16px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n] || '')}</p>
+      ${stores.map(([k, label]) => `<button class="big wstore" data-url="${esc(app[k])}" style="margin-bottom:10px">${label} ${esc(app.name)}</button>`).join('')}`;
+    document.querySelectorAll('.wstore').forEach(b => b.onclick = () => window.open(b.dataset.url, '_blank', 'noopener'));
     return;
   }
   const { data, error } = await sb.from('routes').select('*').eq('wall', Number(n)).order('position').order('created_at');
