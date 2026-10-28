@@ -467,7 +467,7 @@ function route() {
 const WALL_NAMES = { 1:'Spigolo nord ovest', 2:'Parete ovest', 3:'Spigolo sud ovest', 4:'Grotta', 5:'Spigolo sud est', 6:'Parete est', 7:'Spigolo nord est', 8:'Parete nord', 9:'Pinnacolo verde', 10:'Decoy Board', 11:'Moonboard' };
 // Descrizione mostrata in cima alla pagina di alcune pareti
 const WALL_INFO = {
-  10: 'Pannello da allenamento inclinato a 45°.',
+  10: 'Pannello inclinato a 45°. La Decoy Board è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app Decoyboard.',
   11: 'Pannello inclinato a 25°. La MoonBoard è un pannello standard con le prese sempre nella stessa posizione in tutto il mondo: i problemi si scelgono dall\'app MoonBoard.'
 };
 const NO_GIRI = ['10', '11'];   // pannelli senza giri: solo la descrizione
@@ -531,7 +531,7 @@ async function renderParete(n, edit = null) {
   document.getElementById('wback').onclick = () => { if (history.state && history.state.wall) history.back(); else go('pareti', null); };
 
   if (NO_GIRI.includes(n)) {
-    document.getElementById('wbody').innerHTML = `<p style="margin:0;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">ℹ️ ${esc(WALL_INFO[n] || '')}</p>`;
+    document.getElementById('wbody').innerHTML = `<p style="margin:0;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n] || '')}</p>`;
     return;
   }
   const { data, error } = await sb.from('routes').select('*').eq('wall', Number(n)).order('position').order('created_at');
@@ -573,7 +573,7 @@ async function renderParete(n, edit = null) {
     return;
   }
 
-  body.innerHTML = `${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">ℹ️ ${esc(WALL_INFO[n])}</p>` : ''}<button class="big" id="fadd">＋ Aggiungi giro</button>
+  body.innerHTML = `${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<button class="big" id="fadd">＋ Aggiungi giro</button>
     <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
