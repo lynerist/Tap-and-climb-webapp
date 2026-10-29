@@ -184,8 +184,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   :root[data-theme="scuro"], :root[data-theme="pesce"], :root[data-theme="magikarp"], :root[data-theme="turchese"], :root[data-theme="disco"], :root[data-theme="porcini"], :root[data-theme="halloween"], :root[data-theme="cervino"] { --tick:#3ddc84; --tick-ink:#062b14; }
   :root[data-theme="albero"] { --tick:#1f6fd6; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme]) { --tick:#3ddc84; --tick-ink:#062b14; } }
-  .tickslot { width:26px; flex:none; display:grid; place-items:center; }
-  .tickslot svg { animation:tickpop .25s ease-out; }
+  .badge.tickdone { background:var(--tick); color:var(--tick-ink); display:inline-flex; align-items:center; gap:5px; }
+  .badge.tickdone svg { animation:tickpop .25s ease-out; }
   @keyframes tickpop { from { transform:scale(.4); opacity:0; } to { transform:scale(1); opacity:1; } }
   #tdlg { position:fixed; inset:0; z-index:30; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:16px; }
   /* Pareti cliccabili */
@@ -545,7 +545,7 @@ function shapeIcon(sh, color) {
 }
 
 // Tick "giro chiuso": icona e finestra di conferma
-const tickIcon = size => `<svg viewBox="0 0 22 22" width="${size}" height="${size}" role="img" aria-label="Giro chiuso"><circle cx="11" cy="11" r="10" fill="var(--tick)"/><path d="M6 11.5l3.4 3.4L16 8" fill="none" stroke="var(--tick-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const tickIcon = (size, color = 'var(--tick)') => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" role="img" aria-label="Giro chiuso"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function tickDialog(g, isTicked, onDone) {
   document.getElementById('tdlg')?.remove();
   const d = document.createElement('div');
@@ -645,8 +645,7 @@ async function renderParete(n, edit = null) {
     <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:10px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
-      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span>
-      <span class="tickslot">${ticked.has(g.id) ? tickIcon(22) : ''}</span></div>`).join('')
+      <span class="badge${ticked.has(g.id) ? ' tickdone' : ''}" style="font-size:14px;font-weight:700">${ticked.has(g.id) ? tickIcon(15, 'var(--tick-ink)') : ''}${g.grade ? esc(g.grade) : '—'}</span></div>`).join('')
       : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
   document.getElementById('fadd').onclick = () => renderParete(n, 'new');
   document.getElementById('fedit').onclick = () => { editRoutes = !editRoutes; renderParete(n); };
