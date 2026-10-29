@@ -322,7 +322,7 @@ function wireTheme() {
 
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.style.bottom = (profile && profile.is_admin) ? '76px' : '20px';
+  t.style.bottom = profile ? '76px' : '20px';   // sopra il menù in basso
   t.textContent = msg; t.style.display = 'block';
   clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', 3500);
 }
@@ -426,12 +426,11 @@ function renderLogin() {
 }
 
 function shell(inner) {
-  const admin = !!profile.is_admin;   // il menù a tab esiste solo per gli admin
-  const nav = admin ? `<nav>
+  const nav = `<nav>
       <button data-tab="ingressi" class="ghost ${tab === 'ingressi' ? 'on' : ''}">🎟️ Ingressi</button>
       <button data-tab="pareti" class="ghost ${tab === 'pareti' ? 'on' : ''}">🧗 Pareti</button>
-    </nav>` : '';
-  document.body.style.paddingBottom = admin ? '64px' : '';
+    </nav>`;
+  document.body.style.paddingBottom = '64px';
   $app.innerHTML = `<header><div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><h1>Tap and Climb</h1></div>
     <div class="hactions">${themeBtn()}<button class="ghost" id="out">Esci</button></div>${themeMenu()}</header>
     <main>${inner}
@@ -456,7 +455,7 @@ function go(t, w) {
 window.addEventListener('popstate', e => {
   if (!profile) return;
   const st = e.state || {};
-  tab = (st.tab === 'pareti' && profile.is_admin) ? 'pareti' : 'ingressi';
+  tab = st.tab === 'pareti' ? 'pareti' : 'ingressi';
   wallOpen = tab === 'pareti' ? (st.wall || null) : null;
   editRoutes = false;
   clearTimeout(renderUser._t);
@@ -466,7 +465,7 @@ window.addEventListener('popstate', e => {
 // Mostra la schermata giusta in base alla tab (i non-admin vedono sempre "Ingressi")
 function route() {
   document.getElementById('tdlg')?.remove();   // chiude la finestra della tick se si cambia pagina
-  const pareti = !!(profile && profile.is_admin && tab === 'pareti');
+  const pareti = !!(profile && tab === 'pareti');
   if (!pareti) tab = 'ingressi';
   document.getElementById('pfoot').style.display = pareti ? 'none' : '';   // informativa privacy: solo su Ingressi
   return pareti ? (wallOpen ? renderParete(wallOpen) : renderPareti()) : renderUser();
@@ -636,20 +635,22 @@ async function renderParete(n, edit = null) {
     (tk || []).forEach(t => ticked.add(t.route_id));
     if (tab !== 'pareti' || wallOpen !== n) return;
   }
-  body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<div style="display:flex;gap:10px">
+  body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}${profile.is_admin ? `<div style="display:flex;gap:10px">
       <button class="big" id="fadd" style="flex:1;width:auto;padding:16px 8px;font-size:17px">＋ Aggiungi giro</button>
-      <button class="big ${editRoutes ? '' : 'ghost'}" id="fedit" style="flex:1;width:auto;padding:16px 8px;font-size:17px">${editRoutes ? '✓ Fine' : 'Edita giri'}</button></div>
-    ${editRoutes && giri.length ? '<p class="muted" style="margin:10px 0 0;text-align:center">Modalità modifica: tocca un giro per modificarlo</p>' : ''}
+      <button class="big ${editRoutes ? '' : 'ghost'}" id="fedit" style="flex:1;width:auto;padding:16px 8px;font-size:17px">${editRoutes ? '✓ Fine' : 'Edita giri'}</button></div>` : ''}
+    ${profile.is_admin && editRoutes && giri.length ? '<p class="muted" style="margin:10px 0 0;text-align:center">Modalità modifica: tocca un giro per modificarlo</p>' : ''}
     <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:10px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
       <span class="badge${ticked.has(g.id) ? ' tickdone' : ''}" style="font-size:14px;font-weight:700">${ticked.has(g.id) ? tickIcon(15, 'var(--tick-ink)') : ''}${g.grade ? esc(g.grade) : '—'}</span></div>`).join('')
       : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
-  document.getElementById('fadd').onclick = () => renderParete(n, 'new');
-  document.getElementById('fedit').onclick = () => { editRoutes = !editRoutes; renderParete(n); };
+  if (profile.is_admin) {   // solo gli admin aggiungono e modificano i giri
+    document.getElementById('fadd').onclick = () => renderParete(n, 'new');
+    document.getElementById('fedit').onclick = () => { editRoutes = !editRoutes; renderParete(n); };
+  }
   // al tocco: con "Edita giri" acceso si apre la modifica, altrimenti la finestra per mettere o togliere la tick
   document.querySelectorAll('.wroute').forEach(el => el.onclick = () => {
-    if (editRoutes) return renderParete(n, el.dataset.id);
+    if (editRoutes && profile.is_admin) return renderParete(n, el.dataset.id);
     const g = giri.find(x => x.id === el.dataset.id);
     if (g) tickDialog(g, ticked.has(g.id), () => renderParete(n));
   });
@@ -670,7 +671,7 @@ async function renderUser() {
     .select('*, entries(entry_date)').eq('user_id', profile.id)
     .order('requested_at', { ascending:false });
   if (error) { toast(error.message); return; }
-  if (profile.is_admin && tab !== 'ingressi') return;   // nel frattempo si è cambiata tab
+  if (tab !== 'ingressi') return;   // nel frattempo si è cambiata tab
 
   const EXP = 5 * 60 * 1000;
   const left = c => EXP - (Date.now() - new Date(c.requested_at).getTime());
