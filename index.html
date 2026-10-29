@@ -227,6 +227,7 @@ const $app = document.getElementById('app');
 let profile = null;
 let tab = 'ingressi';   // 'ingressi' | 'pareti' (il menù è visibile solo agli admin)
 let wallOpen = null;    // parete aperta nella tab Pareti (null = pianta)
+let editRoutes = false; // modalità "Edita giri" (sempre spenta quando si entra in una parete)
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
@@ -439,7 +440,7 @@ function shell(inner) {
 // Navigazione con cronologia del browser: "indietro" torna alla schermata precedente invece di chiudere l'app
 function go(t, w) {
   if (t === tab && w === wallOpen) return route();
-  tab = t; wallOpen = w;
+  tab = t; wallOpen = w; editRoutes = false;
   try { history.pushState({ tab: t, wall: w }, ''); } catch (e) {}
   route();
 }
@@ -448,6 +449,7 @@ window.addEventListener('popstate', e => {
   const st = e.state || {};
   tab = (st.tab === 'pareti' && profile.is_admin) ? 'pareti' : 'ingressi';
   wallOpen = tab === 'pareti' ? (st.wall || null) : null;
+  editRoutes = false;
   clearTimeout(renderUser._t);
   route();
 });
@@ -589,14 +591,19 @@ async function renderParete(n, edit = null) {
     return;
   }
 
-  body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<button class="big" id="fadd">＋ Aggiungi giro</button>
-    <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px;cursor:pointer">
+  body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<div style="display:flex;gap:10px">
+      <button class="big" id="fadd" style="flex:1;width:auto;padding:16px 8px;font-size:17px">＋ Aggiungi giro</button>
+      <button class="big ${editRoutes ? '' : 'ghost'}" id="fedit" style="flex:1;width:auto;padding:16px 8px;font-size:17px">${editRoutes ? '✓ Fine' : 'Edita giri'}</button></div>
+    ${editRoutes && giri.length ? '<p class="muted" style="margin:10px 0 0;text-align:center">Modalità modifica: tocca un giro per modificarlo</p>' : ''}
+    <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px${editRoutes ? ';cursor:pointer' : ''}">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
       <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span></div>`).join('')
       : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
   document.getElementById('fadd').onclick = () => renderParete(n, 'new');
-  document.querySelectorAll('.wroute').forEach(el => el.onclick = () => renderParete(n, el.dataset.id));
+  document.getElementById('fedit').onclick = () => { editRoutes = !editRoutes; renderParete(n); };
+  // al tocco un giro si apre per la modifica solo con "Edita giri" acceso (altrimenti il tocco è libero, per le gesture)
+  if (editRoutes) document.querySelectorAll('.wroute').forEach(el => el.onclick = () => renderParete(n, el.dataset.id));
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
