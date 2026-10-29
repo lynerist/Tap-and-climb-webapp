@@ -551,14 +551,12 @@ function tickDialog(g, isTicked, onDone) {
   const d = document.createElement('div');
   d.id = 'tdlg';
   d.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="width:100%;max-width:360px;margin:0;text-align:center">
-      <div style="display:flex;justify-content:center;margin-bottom:6px">${isTicked ? tickIcon(46) : shapeIcon(g.shape, g.color)}</div>
+      <div style="display:flex;justify-content:center;margin-bottom:6px">${shapeIcon(g.shape, g.color)}</div>
       <h2 style="margin:0 0 2px;font-size:19px">${esc(g.name)}</h2>
-      <div class="muted" style="margin-bottom:14px">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.grade ? ' · ' + esc(g.grade) : ''}</div>
+      <div class="muted" style="margin-bottom:18px">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.grade ? ' · ' + esc(g.grade) : ''}</div>
       ${isTicked
-        ? `<p style="margin:0 0 14px;font-weight:700;color:var(--tick)">Giro chiuso ✓</p>
-           <button class="big bad" id="tact" style="margin-bottom:10px">Togli la tick</button>`
-        : `<p class="muted" style="margin:0 0 14px">Hai chiuso questo giro?</p>
-           <button class="big ok" id="tact" style="margin-bottom:10px;background:var(--tick);color:var(--tick-ink)">✓ Giro chiuso</button>`}
+        ? `<button class="big bad" id="tact" style="margin-bottom:10px">Non l'ho chiuso</button>`
+        : `<button class="big ok" id="tact" style="margin-bottom:10px;background:var(--tick);color:var(--tick-ink)">Segna come chiuso</button>`}
       <button class="ghost" id="tclose" style="width:100%">${isTicked ? 'Chiudi' : 'Annulla'}</button></div>`;
   document.body.appendChild(d);
   const close = () => { d.remove(); document.removeEventListener('keydown', onKey); };
