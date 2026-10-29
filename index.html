@@ -179,6 +179,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   nav { position:fixed; bottom:0; left:0; right:0; z-index:5; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
   nav button.ghost { flex:1; background:transparent; color:var(--muted); border:0; border-radius:0; padding:14px 8px; font-size:15px; }
   nav button.ghost.on { color:var(--accent); font-weight:600; }
+  /* Tick "giro chiuso": verde, blu nel tema già verde (albero), verde più chiaro sui temi scuri */
+  :root { --tick:#1f9d55; --tick-ink:#fff; }
+  :root[data-theme="scuro"], :root[data-theme="pesce"], :root[data-theme="magikarp"], :root[data-theme="turchese"], :root[data-theme="disco"], :root[data-theme="porcini"], :root[data-theme="halloween"], :root[data-theme="cervino"] { --tick:#3ddc84; --tick-ink:#062b14; }
+  :root[data-theme="albero"] { --tick:#1f6fd6; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme]) { --tick:#3ddc84; --tick-ink:#062b14; } }
+  .tickslot { width:26px; flex:none; display:grid; place-items:center; }
+  .tickslot svg { animation:tickpop .25s ease-out; }
+  @keyframes tickpop { from { transform:scale(.4); opacity:0; } to { transform:scale(1); opacity:1; } }
+  #tdlg { position:fixed; inset:0; z-index:30; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:16px; }
   /* Pareti cliccabili */
   .wall { cursor:pointer; outline:none; -webkit-tap-highlight-color:transparent; }
   .wall .hit { stroke:transparent; stroke-width:34; fill:none; }
@@ -456,6 +465,7 @@ window.addEventListener('popstate', e => {
 
 // Mostra la schermata giusta in base alla tab (i non-admin vedono sempre "Ingressi")
 function route() {
+  document.getElementById('tdlg')?.remove();   // chiude la finestra della tick se si cambia pagina
   const pareti = !!(profile && profile.is_admin && tab === 'pareti');
   if (!pareti) tab = 'ingressi';
   document.getElementById('pfoot').style.display = pareti ? 'none' : '';   // informativa privacy: solo su Ingressi
@@ -534,6 +544,37 @@ function shapeIcon(sh, color) {
   return `<svg viewBox="0 0 22 22" width="26" height="26" style="flex:none" role="img" aria-label="${SHAPE_NAMES[sh]} ${esc(color)}">${g}</svg>`;
 }
 
+// Tick "giro chiuso": icona e finestra di conferma
+const tickIcon = size => `<svg viewBox="0 0 22 22" width="${size}" height="${size}" role="img" aria-label="Giro chiuso"><circle cx="11" cy="11" r="10" fill="var(--tick)"/><path d="M6 11.5l3.4 3.4L16 8" fill="none" stroke="var(--tick-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function tickDialog(g, isTicked, onDone) {
+  document.getElementById('tdlg')?.remove();
+  const d = document.createElement('div');
+  d.id = 'tdlg';
+  d.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-label="${esc(g.name)}" style="width:100%;max-width:360px;margin:0;text-align:center">
+      <div style="display:flex;justify-content:center;margin-bottom:6px">${isTicked ? tickIcon(46) : shapeIcon(g.shape, g.color)}</div>
+      <h2 style="margin:0 0 2px;font-size:19px">${esc(g.name)}</h2>
+      <div class="muted" style="margin-bottom:14px">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.grade ? ' · ' + esc(g.grade) : ''}</div>
+      ${isTicked
+        ? `<p style="margin:0 0 14px;font-weight:700;color:var(--tick)">Giro chiuso ✓</p>
+           <button class="big bad" id="tact" style="margin-bottom:10px">Togli la tick</button>`
+        : `<p class="muted" style="margin:0 0 14px">Hai chiuso questo giro?</p>
+           <button class="big ok" id="tact" style="margin-bottom:10px;background:var(--tick);color:var(--tick-ink)">✓ Giro chiuso</button>`}
+      <button class="ghost" id="tclose" style="width:100%">${isTicked ? 'Chiudi' : 'Annulla'}</button></div>`;
+  document.body.appendChild(d);
+  const close = () => { d.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  d.onclick = e => { if (e.target === d) close(); };
+  document.getElementById('tclose').onclick = close;
+  document.getElementById('tact').onclick = async ev => {
+    ev.currentTarget.disabled = true;
+    const { error } = isTicked ? await sb.from('route_ticks').delete().eq('route_id', g.id)
+                               : await sb.from('route_ticks').insert({ route_id: g.id });
+    if (error && !(error.code === '23505' && !isTicked)) { toast(error.message); ev.currentTarget.disabled = false; return; }
+    close(); toast(isTicked ? 'Tick tolta' : 'Giro chiuso ✅'); onDone();
+  };
+}
+
 // Pagina di una singola parete: "Indietro" a sinistra, nome a destra, sotto l'elenco dei giri (si aggiungono, modificano e tolgono da qui)
 async function renderParete(n, edit = null) {
   n = String(n);
@@ -591,19 +632,30 @@ async function renderParete(n, edit = null) {
     return;
   }
 
+  const ticked = new Set();
+  if (giri.length) {
+    const { data: tk } = await sb.from('route_ticks').select('route_id').in('route_id', giri.map(g => g.id));   // se la tabella manca: nessuna tick
+    (tk || []).forEach(t => ticked.add(t.route_id));
+    if (tab !== 'pareti' || wallOpen !== n) return;
+  }
   body.innerHTML = `${WALL_ALERT[n] ? `<div role="alert" style="margin:0 0 14px;padding:12px 14px;border-radius:10px;border-left:5px solid #e5a300;background:rgba(229,163,0,.18);font-weight:600;line-height:1.4">⚠️ ${esc(WALL_ALERT[n])}</div>` : ''}${WALL_INFO[n] ? `<p style="margin:0 0 14px;padding:12px;border-radius:10px;background:var(--line);line-height:1.45">${esc(WALL_INFO[n])}</p>` : ''}<div style="display:flex;gap:10px">
       <button class="big" id="fadd" style="flex:1;width:auto;padding:16px 8px;font-size:17px">＋ Aggiungi giro</button>
       <button class="big ${editRoutes ? '' : 'ghost'}" id="fedit" style="flex:1;width:auto;padding:16px 8px;font-size:17px">${editRoutes ? '✓ Fine' : 'Edita giri'}</button></div>
     ${editRoutes && giri.length ? '<p class="muted" style="margin:10px 0 0;text-align:center">Modalità modifica: tocca un giro per modificarlo</p>' : ''}
-    <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:12px${editRoutes ? ';cursor:pointer' : ''}">
+    <div style="margin-top:8px">${giri.length ? giri.map(g => `<div class="row wroute" data-id="${esc(g.id)}" style="justify-content:flex-start;gap:10px;cursor:pointer">
       ${shapeIcon(g.shape, g.color)}
       <div style="flex:1;min-width:0"><b>${esc(g.name)}</b><div class="muted">${esc(SHAPE_NAMES[g.shape])} ${esc(g.color)}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
-      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span></div>`).join('')
+      <span class="badge" style="font-size:14px;font-weight:700">${g.grade ? esc(g.grade) : '—'}</span>
+      <span class="tickslot">${ticked.has(g.id) ? tickIcon(22) : ''}</span></div>`).join('')
       : '<p class="muted">Nessun giro in elenco.</p>'}</div>`;
   document.getElementById('fadd').onclick = () => renderParete(n, 'new');
   document.getElementById('fedit').onclick = () => { editRoutes = !editRoutes; renderParete(n); };
-  // al tocco un giro si apre per la modifica solo con "Edita giri" acceso (altrimenti il tocco è libero, per le gesture)
-  if (editRoutes) document.querySelectorAll('.wroute').forEach(el => el.onclick = () => renderParete(n, el.dataset.id));
+  // al tocco: con "Edita giri" acceso si apre la modifica, altrimenti la finestra per mettere o togliere la tick
+  document.querySelectorAll('.wroute').forEach(el => el.onclick = () => {
+    if (editRoutes) return renderParete(n, el.dataset.id);
+    const g = giri.find(x => x.id === el.dataset.id);
+    if (g) tickDialog(g, ticked.has(g.id), () => renderParete(n));
+  });
 }
 
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
