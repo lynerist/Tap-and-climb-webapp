@@ -240,7 +240,7 @@ let editRoutes = false; // modalità "Edita giri" (sempre spenta quando si entra
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate = d => new Date(d).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
-const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato', rejected:'Rifiutato' };
+const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato', rejected:'Rifiutato', queued:'In coda' };
 
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
