@@ -659,6 +659,8 @@ async function renderParete(n, edit = null) {
 // Posizione del telefono (serve solo per verificare che l'utente sia in palestra; non viene salvata)
 function getPosition() {
   return new Promise((resolve, reject) => {
+    // Soci esentati dal controllo posizione (decide il database): non si chiede il GPS
+    if (profile && profile.location_exempt) return resolve({ latitude:null, longitude:null, accuracy:null });
     if (!navigator.geolocation) return reject({ code: 0 });
     navigator.geolocation.getCurrentPosition(p => resolve(p.coords), reject,
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
