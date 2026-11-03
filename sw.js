@@ -1,6 +1,6 @@
 // Service worker minimo: rende l'app installabile e velocizza l'apertura.
 // Le chiamate a Supabase e a Google NON passano di qui (solo file dello stesso sito).
-const CACHE = 'tapandclimb-v1';
+const CACHE = 'tapandclimb-v1b';
 const SHELL = ['index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
