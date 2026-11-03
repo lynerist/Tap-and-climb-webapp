@@ -22,7 +22,7 @@
   <!-- vegetazione -->
   <g fill="#4f8a3c"><circle cx="112" cy="300" r="12"/><circle cx="126" cy="312" r="9"/><circle cx="288" cy="470" r="11"/><circle cx="272" cy="482" r="8"/><circle cx="92" cy="650" r="14"/><circle cx="110" cy="662" r="10"/></g>
   <!-- fiume turchese -->
-  <path d="M0 720 L96 700 L138 600 L150 640 L200 700 L250 640 L260 590 L300 690 L400 700 L400 800 L0 800Z" fill="url(#river)"/>
+  <path d="M0 720 L96 700 L138 600 Q200 645 260 590 L300 690 L400 700 L400 800 L0 800Z" fill="url(#river)"/>
   <g stroke="#bff3ee" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8">
     <path d="M30 750 q20 -8 40 0 t40 0"/><path d="M190 770 q20 -8 40 0 t40 0"/><path d="M290 735 q20 -8 40 0 t40 0"/>
   </g>
