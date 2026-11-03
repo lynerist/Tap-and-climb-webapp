@@ -137,6 +137,29 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     background-attachment: fixed;
   }
   :root[data-theme="cervino"] button:not(.ghost):not(.bad):not(.ok) { color:#1a0a05; }
+  :root[data-theme="broccoli"] {
+    --bg:#e6f3d4; --card:rgba(250,255,240,.94); --text:#1f3a14; --muted:#5f7d4a; --accent:#ee8a1f; --line:#cfe4b0;
+    color-scheme: light;
+  }
+  :root[data-theme="broccoli"] body { background: url("img/tema-broccoli.svg") 0 0 / 200px 200px repeat fixed, #e6f3d4; }
+  :root[data-theme="broccoli"] button:not(.ghost):not(.bad):not(.ok) { color:#2b1a05; }
+  :root[data-theme="verdon"] {
+    --bg:#d9f1f7; --card:rgba(255,255,255,.93); --text:#14333a; --muted:#4f7f86; --accent:#0f8f9a; --line:#b9dcd8;
+    color-scheme: light;
+  }
+  :root[data-theme="verdon"] body { background: url("img/tema-verdon.svg") center bottom / cover no-repeat fixed, #d9f1f7; }
+  :root[data-theme="fessura"] {
+    --bg:#2a2826; --card:rgba(38,36,34,.93); --text:#f1efe9; --muted:#aaa49a; --accent:#ffb020; --line:#4a4742;
+    color-scheme: dark;
+  }
+  :root[data-theme="fessura"] body { background: url("img/tema-fessura.svg") center / cover no-repeat fixed, #2a2826; }
+  :root[data-theme="fessura"] button:not(.ghost):not(.bad):not(.ok) { color:#2a1a02; }
+  :root[data-theme="capitan"] {
+    --bg:#3b1f5e; --card:rgba(46,24,72,.9); --text:#fff0f6; --muted:#d4a8d8; --accent:#ff7eb6; --line:#6a3f8f;
+    color-scheme: dark;
+  }
+  :root[data-theme="capitan"] body { background: url("img/tema-capitan.svg") center bottom / cover no-repeat fixed, #3b1f5e; }
+  :root[data-theme="capitan"] button:not(.ghost):not(.bad):not(.ok) { color:#2a0f3a; }
   header { position:relative; }
   .hactions { display:flex; align-items:center; gap:8px; }
   #thbtn { padding:4px 10px; font-size:18px; line-height:1.3; }
@@ -181,8 +204,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   nav button.ghost.on { color:var(--accent); font-weight:600; }
   /* Tick "giro chiuso": verde, blu nel tema già verde (albero), verde più chiaro sui temi scuri */
   :root { --tick:#1f9d55; --tick-ink:#fff; }
-  :root[data-theme="scuro"], :root[data-theme="pesce"], :root[data-theme="magikarp"], :root[data-theme="turchese"], :root[data-theme="disco"], :root[data-theme="porcini"], :root[data-theme="halloween"], :root[data-theme="cervino"] { --tick:#3ddc84; --tick-ink:#062b14; }
-  :root[data-theme="albero"] { --tick:#1f6fd6; }
+  :root[data-theme="scuro"], :root[data-theme="pesce"], :root[data-theme="magikarp"], :root[data-theme="turchese"], :root[data-theme="disco"], :root[data-theme="porcini"], :root[data-theme="halloween"], :root[data-theme="cervino"], :root[data-theme="fessura"], :root[data-theme="capitan"] { --tick:#3ddc84; --tick-ink:#062b14; }
+  :root[data-theme="albero"], :root[data-theme="broccoli"] { --tick:#1f6fd6; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme]) { --tick:#3ddc84; --tick-ink:#062b14; } }
   .badge.tickdone { background:var(--tick); color:var(--tick-ink); display:inline-flex; align-items:center; gap:5px; }
   .badge.tickdone svg { animation:tickpop .25s ease-out; }
@@ -245,8 +268,8 @@ const STATUS = { requested:'In attesa', active:'Attivo', completed:'Completato',
 // ---------- Temi ----------
 // 'auto' = predefinito (chiaro/scuro come il telefono). Un socio può avere un tema fisso (profile.theme);
 // chi ha can_switch_theme sceglie dal menu, la scelta resta salvata su questo telefono.
-const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', magikarp:'Magikarp 🌊', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻', porcini:'Porcini 🍄', natale:'Natale 🎄', halloween:'Halloween 🎃', aprile:'Pesce d\'aprile 🐠', cervino:'Cervino ⛰️' };
-const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', magikarp:'#14202b', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317', porcini:'#1e1a12', natale:'#1b2a52', halloween:'#1a1038', aprile:'#7fd3f0', cervino:'#1d2b5a' };
+const THEMES = { auto:'Predefinito', chiaro:'Chiaro', scuro:'Scuro', rosa:'Rosa con fiorellini 🌸', pesce:'Pesciolino 🐟', magikarp:'Magikarp 🌊', albero:'Tree climber 🌳', turchese:'Turchese e note 🎵', gattini:'Gattini 🐱', casuale:'Sorpresa del giorno 🎲', disco:'Disco anni 80 🪩', girasoli:'Girasoli 🌻', porcini:'Porcini 🍄', natale:'Natale 🎄', halloween:'Halloween 🎃', aprile:'Pesce d\'aprile 🐠', cervino:'Cervino ⛰️', broccoli:'Broccoli e carote 🥦', verdon:'Verdon 🇫🇷', fessura:'Fessura d\'incastro 🧗', capitan:'El Capitan 🌄' };
+const THEME_COLOR = { auto:'#164e70', chiaro:'#164e70', scuro:'#164e70', rosa:'#e0508a', pesce:'#0b2a3d', magikarp:'#14202b', albero:'#cfe8f7', turchese:'#10282c', gattini:'#f08a5d', casuale:'#164e70', disco:'#1a0b3b', girasoli:'#e8a317', porcini:'#1e1a12', natale:'#1b2a52', halloween:'#1a1038', aprile:'#7fd3f0', cervino:'#1d2b5a', broccoli:'#e6f3d4', verdon:'#7cc4ec', fessura:'#2a2826', capitan:'#3b1f5e' };
 // Temi di stagione: valgono per tutti e hanno la precedenza su quello personale (ora italiana)
 let sessionTheme = null;   // scelta temporanea nei periodi festivi: non viene salvata, alla riapertura torna il tema di stagione
 function seasonalTheme() {
@@ -269,7 +292,7 @@ function currentTheme() {
   return 'auto';
 }
 // 'casuale': ogni giorno un tema diverso, uguale per tutta la giornata e per tutti gli utenti (ora italiana), scelto tra quelli decorativi
-const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli','porcini','natale','halloween','aprile','cervino'];
+const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli','porcini','natale','halloween','aprile','cervino','broccoli','verdon','fessura','capitan'];
 function themeOfTheDay() {
   const day = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
   const key = day;   // solo il giorno: stesso tema per tutti i 'casuale' (così non si spoilerano)

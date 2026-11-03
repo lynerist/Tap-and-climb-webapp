@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <!-- broccolo -->
+  <g transform="translate(46 56)">
+    <path d="M-7 4 L-10 30 Q0 35 10 30 L7 4Z" fill="#9bc46a"/>
+    <path d="M-1 8 L-1 30 M-5 14 L-8 24 M3 14 L7 24" stroke="#7aa84e" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g fill="#2f8a35"><circle cx="-14" cy="-2" r="12"/><circle cx="14" cy="-2" r="12"/><circle cx="0" cy="-12" r="14"/></g>
+    <g fill="#3fa244"><circle cx="-8" cy="-8" r="9"/><circle cx="9" cy="-9" r="8"/><circle cx="0" cy="2" r="9"/></g>
+    <g fill="#62bb5a"><circle cx="-10" cy="-11" r="3"/><circle cx="6" cy="-14" r="3"/><circle cx="12" cy="-4" r="2.5"/><circle cx="-3" cy="-4" r="2.5"/></g>
+  </g>
+  <!-- carota -->
+  <g transform="translate(142 62) rotate(28)">
+    <path d="M-10 0 Q0 -6 10 0 L0 52Z" fill="#f08a24"/>
+    <path d="M-6 12 L2 13 M-4 24 L3 25 M-2 36 L3 37" stroke="#c96a12" stroke-width="2" stroke-linecap="round"/>
+    <path d="M0 -2 Q-12 -22 -8 -30 Q-2 -22 0 -2 Q2 -26 8 -32 Q10 -20 0 -2 Q10 -16 18 -16 Q14 -6 0 -2Z" fill="#4aa54a"/>
+  </g>
+  <!-- broccolo piccolo -->
+  <g transform="translate(150 166) scale(.7)">
+    <path d="M-7 4 L-10 30 Q0 35 10 30 L7 4Z" fill="#a8cf78"/>
+    <g fill="#3a9a3f"><circle cx="-14" cy="-2" r="12"/><circle cx="14" cy="-2" r="12"/><circle cx="0" cy="-12" r="14"/></g>
+    <g fill="#55b150"><circle cx="-8" cy="-8" r="9"/><circle cx="9" cy="-9" r="8"/><circle cx="0" cy="2" r="9"/></g>
+  </g>
+  <!-- carota piccola -->
+  <g transform="translate(40 172) rotate(-32) scale(.7)">
+    <path d="M-10 0 Q0 -6 10 0 L0 52Z" fill="#f59a3a"/>
+    <path d="M-6 12 L2 13 M-4 24 L3 25" stroke="#d57a1c" stroke-width="2" stroke-linecap="round"/>
+    <path d="M0 -2 Q-12 -22 -8 -30 Q-2 -22 0 -2 Q2 -26 8 -32 Q10 -20 0 -2Z" fill="#5db05a"/>
+  </g>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1262"/><stop offset=".45" stop-color="#7a3fb8"/><stop offset=".8" stop-color="#d78ad0"/><stop offset="1" stop-color="#ffc0d6"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffb2cf"/><stop offset=".55" stop-color="#f58bb4"/><stop offset=".56" stop-color="#c0608f"/><stop offset="1" stop-color="#8f3f78"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="800" fill="url(#sky)"/>
+  <g fill="#fff"><circle cx="40" cy="60" r="1.8"/><circle cx="120" cy="30" r="1.4"/><circle cx="210" cy="80" r="1.8"/><circle cx="300" cy="40" r="1.4"/><circle cx="360" cy="110" r="1.8"/><circle cx="70" cy="150" r="1.2"/><circle cx="250" cy="170" r="1.4"/><circle cx="170" cy="140" r="1.2"/></g>
+  <!-- El Capitan: grande parete verticale -->
+  <path d="M70 800 L70 330 Q72 250 120 232 L165 232 L185 214 L305 214 L330 236 Q350 270 346 340 L346 800Z" fill="url(#face)"/>
+  <!-- strisce nere verticali della roccia -->
+  <g stroke="#7d3a73" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round">
+    <path d="M130 250 L126 560"/><path d="M168 240 L172 620"/><path d="M215 224 L210 700"/><path d="M262 224 L266 520"/>
+  </g>
+  <g stroke="#fff" stroke-width="2" opacity=".28" fill="none" stroke-linecap="round"><path d="M100 300 L98 640"/><path d="M190 232 L192 560"/></g>
+  <!-- La Nose: spigolo luminoso -->
+  <path d="M296 214 Q292 400 300 800" stroke="#ffe0ec" stroke-width="4" opacity=".7" fill="none"/>
+  <!-- nuvoletta rosa -->
+  <ellipse cx="90" cy="360" rx="70" ry="10" fill="#ffd2e4" opacity=".35"/>
+  <ellipse cx="320" cy="300" rx="55" ry="8" fill="#ffd2e4" opacity=".3"/>
+  <!-- alberi in basso -->
+  <path d="M0 800 L0 730 L22 690 L44 730 L62 700 L84 740 L108 692 L130 740 L152 705 L176 745 L202 698 L228 742 L252 706 L278 744 L304 700 L328 742 L352 696 L378 736 L400 702 L400 800Z" fill="#2a1048"/>
+  <path d="M0 800 L0 770 L30 740 L56 772 L90 746 L120 774 L158 748 L190 776 L224 750 L258 776 L292 750 L326 776 L362 748 L400 772 L400 800Z" fill="#1a0a30"/>
+</svg>
