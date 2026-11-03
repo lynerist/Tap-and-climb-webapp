@@ -268,11 +268,11 @@ function currentTheme() {
   }
   return 'auto';
 }
-// 'casuale': ogni giorno un tema diverso (uguale per tutta la giornata, ora italiana), scelto tra quelli decorativi
+// 'casuale': ogni giorno un tema diverso, uguale per tutta la giornata e per tutti gli utenti (ora italiana), scelto tra quelli decorativi
 const RANDOM_POOL = ['rosa','pesce','magikarp','albero','turchese','gattini','disco','girasoli','porcini','natale','halloween','aprile','cervino'];
 function themeOfTheDay() {
   const day = new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Rome' });
-  const key = day + (profile ? profile.id : '');
+  const key = day;   // solo il giorno: stesso tema per tutti i 'casuale' (così non si spoilerano)
   let h = 0;
   for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 2654435761) >>> 0;
   h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13; h = Math.imul(h, 3266489917) >>> 0; h ^= h >>> 16;
