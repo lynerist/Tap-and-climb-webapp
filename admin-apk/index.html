@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>App admin – Tap and Climb</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1c2230; --muted:#6b7385; --accent:#2f6fed; --line:#e4e7ee; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#8b93a7; --line:#2a303d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:480px; margin:0 auto; padding:10vh 16px 32px; text-align:center; }
+  img { width:96px; height:96px; border-radius:22px; }
+  h1 { font-size:22px; margin:12px 0 4px; }
+  .muted { color:var(--muted); font-size:14px; }
+  a.big { display:block; margin:24px 0 8px; padding:16px; border-radius:12px; background:var(--accent); color:#fff; font-size:18px; font-weight:600; text-decoration:none; }
+  .card { text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-top:24px; }
+  .card h2 { font-size:16px; margin:0 0 8px; }
+  .card ol { margin:0; padding-left:20px; line-height:1.5; }
+</style>
+</head>
+<body>
+<main>
+  <img src="icon.png" alt="">
+  <h1>App admin</h1>
+  <div class="muted">Tap and Climb · solo per amministratori Android</div>
+  <a class="big" href="https://github.com/Lynerist/Tap-and-climb-webapp/releases/download/apk/tap-and-climb-admin.apk">Scarica l'ultima versione</a>
+  <div class="muted" id="ver">&nbsp;</div>
+  <div class="card">
+    <h2>Come si installa</h2>
+    <ol>
+      <li>Tocca il pulsante e apri il file scaricato.</li>
+      <li>Se Android lo chiede, consenti l'installazione da questa fonte.</li>
+      <li>Tocca <b>Installa</b>: se l'app c'è già, viene aggiornata senza perdere nulla.</li>
+    </ol>
+  </div>
+</main>
+<script>
+  // Mostra versione e data dell'ultimo APK pubblicato
+  fetch('https://api.github.com/repos/Lynerist/Tap-and-climb-webapp/releases/tags/apk')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => {
+      const v = (d.body || '').replace(/^Versione\s*/i, '').trim();
+      const day = new Date(d.published_at).toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' });
+      document.getElementById('ver').textContent = (v ? 'Versione ' + v + ' · ' : '') + 'pubblicata il ' + day;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
